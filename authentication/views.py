@@ -11,7 +11,6 @@ from authentication.models import User, PhoneOTP
 # Create your views here.
 class SendOTPView(APIView):
     def post(self, request):
-        print(request.data)
         phone_number = request.data.get('phone_number')
         if not phone_number:
             return Response({'error': 'Missing phone number'}, status=status.HTTP_400_BAD_REQUEST)
@@ -28,8 +27,6 @@ class SendOTPView(APIView):
             otp=otp
         )
 
-        # send otp here
-        print(f'OTP for {phone_number}: {otp}')
         return Response({'otp': otp}, status=status.HTTP_200_OK)
 
 
