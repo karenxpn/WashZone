@@ -6,12 +6,14 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from .decorators import validate_request_body
 
 from authentication.models import User, PhoneOTP
 from twilio.rest import Client
 
 # Create your views here.
 class SendOTPView(APIView):
+    @validate_request_body(['phone_number'])
     def post(self, request):
         try:
             phone_number = request.data.get('phone_number')
@@ -61,6 +63,7 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
+    @validate_request_body(['phone_number', 'otp'])
     def post(self, request):
         phone_number = request.data.get('phone_number')
         otp = request.data.get('otp')
@@ -88,3 +91,8 @@ class VerifyOTPView(APIView):
             return Response({"error": "Phone number not found"}, status=status.HTTP_404_NOT_FOUND)
         except PhoneOTP.DoesNotExist:
             return Response({"error": "No OTP found for this user"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
