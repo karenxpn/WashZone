@@ -1,30 +1,44 @@
 import random
+import os
 
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from authentication.models import User, PhoneOTP
-
+from twilio.rest import Client
 
 # Create your views here.
 class SendOTPView(APIView):
     def post(self, request):
-        phone_number = request.data.get('phone_number')
-        if not phone_number:
-            return Response({'error': 'Missing phone number'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            phone_number = request.data.get('phone_number')
+        except:
+            return Response({'error': 'Missing phone number'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        user, created = User.objects.get_or_create(phone_number=phone_number)
-        if created:
-            user.username = f'user_{phone_number}'
-            user.has_usable_password()
+
+        print(phone_number)
+        try:
+            # Check if the user already exists
+            user = User.objects.get(phone_number=phone_number)
+        except User.DoesNotExist:
+            # Create a new user if not already present
+            user = User(phone_number=phone_number, username=f"user_{phone_number}")
+            user.set_unusable_password()
             user.save()
 
+
         otp = str(random.randint(100000, 999999))
-        otp_entry, created = PhoneOTP.objects.get_or_create(
+
+        otp_entry, created = PhoneOTP.objects.update_or_create(
             user=user,
-            otp=otp
+            defaults={
+                'otp': otp,
+                'created_at': now()
+            }
         )
 
         return Response({'otp': otp}, status=status.HTTP_200_OK)
@@ -49,7 +63,6 @@ class VerifyOTPView(APIView):
                 return Response({
                     "message": "OTP verified successfully",
                     "access": str(refresh.access_token),
-                    "refresh": str(refresh)
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
