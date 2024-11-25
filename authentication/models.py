@@ -1,7 +1,7 @@
-import random
-
+from django.utils.timezone import now
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import datetime
 
 # Create your models here.
 class User(AbstractUser):
@@ -13,11 +13,14 @@ class User(AbstractUser):
 
 
 class PhoneOTP(models.Model):
-    phone_number = models.CharField(max_length=15, unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='otp')
     otp = models.CharField(max_length=6, blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def generate_otp(self):
-        self.otp = f"{random.randint(100000, 999999)}"
-        self.save()
+    def is_expired(self):
+        return now() > self.created_at + datetime.timedelta(minutes=10)
+
+    def __str__(self):
+        return f"{self.user.phone_number} - {self.otp}"
+
 
