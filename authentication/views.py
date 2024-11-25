@@ -20,7 +20,6 @@ class SendOTPView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-        print(phone_number)
         try:
             # Check if the user already exists
             user = User.objects.get(phone_number=phone_number)
@@ -41,8 +40,25 @@ class SendOTPView(APIView):
             }
         )
 
-        return Response({'otp': otp}, status=status.HTTP_200_OK)
+        # Send the OTP using Twilio
+        account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+        auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
 
+        try:
+            client = Client(account_sid, auth_token)
+            message = client.messages.create(
+                messaging_service_sid=os.environ.get('MESSAGING_SERVICE_SID'),
+                body=f'Your OTP for Wash Zone is {otp}',
+                to=phone_number,
+            )
+
+            return Response({'otp': otp}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to send OTP: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class VerifyOTPView(APIView):
     def post(self, request):
@@ -64,8 +80,10 @@ class VerifyOTPView(APIView):
                     "message": "OTP verified successfully",
                     "access": str(refresh.access_token),
                 }, status=status.HTTP_200_OK)
+
             else:
                 return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
         except User.DoesNotExist:
             return Response({"error": "Phone number not found"}, status=status.HTTP_404_NOT_FOUND)
         except PhoneOTP.DoesNotExist:
