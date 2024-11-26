@@ -26,7 +26,7 @@ def validate_request(serializer_class):
                     formatted_errors.append(f"{field}: {message.lower()}")
 
             # Return the formatted error response
-            return Response({"message": " ".join(formatted_errors)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "\n".join(formatted_errors)}, status=status.HTTP_400_BAD_REQUEST)
 
         return wrapper
 
