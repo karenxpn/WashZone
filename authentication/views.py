@@ -3,24 +3,24 @@ import os
 
 from django.utils.timezone import now
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .decorators import validate_request_body
+from .decorators import validate_request
 
 from authentication.models import User, PhoneOTP
 from twilio.rest import Client
 
+from .serializers import SendOtpBodySerializer
+
+
 # Create your views here.
 class SendOTPView(APIView):
-    @validate_request_body(['phone_number'])
+    @validate_request(SendOtpBodySerializer)
     def post(self, request):
-        try:
-            phone_number = request.data.get('phone_number')
-        except:
-            return Response({'error': 'Missing phone number'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+        validated_data = request.validated_data
+        phone_number = validated_data['phone_number']
 
         try:
             # Check if the user already exists
@@ -63,7 +63,7 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
-    @validate_request_body(['phone_number', 'otp'])
+    # @validate_request_body(['phone_number', 'otp'])
     def post(self, request):
         phone_number = request.data.get('phone_number')
         otp = request.data.get('otp')

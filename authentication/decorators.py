@@ -1,32 +1,24 @@
-from functools import wraps
 from rest_framework.response import Response
 from rest_framework import status
+from functools import wraps
 
-def validate_request_body(required_fields):
-    """
-    Decorator to validate the request body against required fields.
-    """
+def validate_request(serializer_class):
     def decorator(func):
         @wraps(func)
         def wrapper(self, request, *args, **kwargs):
-            data = request.data
-            # Check for missing fields
-            missing_fields = [field for field in required_fields if field not in data]
-            if missing_fields:
-                return Response(
-                    {'error': f"Missing fields: {', '.join(missing_fields)}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            serializer = serializer_class(data=request.data)
+            if serializer.is_valid():
+                # Pass validated data to the view function
+                request.validated_data = serializer.validated_data
+                return func(self, request, *args, **kwargs)
 
-            # Check for extra fields
-            extra_fields = [field for field in data if field not in required_fields]
-            if extra_fields:
-                return Response(
-                    {'error': f"Extra fields provided: {', '.join(extra_fields)}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            # Extract the first error message
+            errors = serializer.errors
+            first_error = next(iter(errors.values()))
+            if isinstance(first_error, list):
+                first_error = first_error[0]
 
-            # Proceed to the actual function
-            return func(self, request, *args, **kwargs)
+            # Return formatted error response
+            return Response({"message": str(first_error)}, status=status.HTTP_400_BAD_REQUEST)
         return wrapper
     return decorator
