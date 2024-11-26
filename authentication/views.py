@@ -11,7 +11,7 @@ from .decorators import validate_request, validate_unexpected_fields
 from authentication.models import User, PhoneOTP
 from twilio.rest import Client
 
-from authentication.serializers.send_otp_body_serializer import SendOtpBodySerializer
+from .serializers.send_otp_body_serializer import SendOtpBodySerializer
 from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
 
 
@@ -20,7 +20,9 @@ class SendOTPView(APIView):
     @validate_unexpected_fields(SendOtpBodySerializer)
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
+        print(request.data)
         validated_data = request.validated_data
+        print(validated_data)
         phone_number = validated_data['phone_number']
 
         try:
