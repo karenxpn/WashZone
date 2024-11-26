@@ -1,6 +1,4 @@
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from rest_framework import status
 from functools import wraps
 
 
@@ -25,8 +23,8 @@ def validate_request(serializer_class):
                 for message in messages:
                     formatted_errors.append(f"{field}: {message.lower()}")
 
-            # Return the formatted error response
-            return Response({"message": "\n".join(formatted_errors)}, status=status.HTTP_400_BAD_REQUEST)
+            # raise the formatted error response
+            raise ValidationError({"message": "\n".join(formatted_errors)})
 
         return wrapper
 
