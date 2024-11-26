@@ -3,20 +3,21 @@ import os
 
 from django.utils.timezone import now
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .decorators import validate_request
+from .decorators import validate_request, validate_unexpected_fields
 
 from authentication.models import User, PhoneOTP
 from twilio.rest import Client
 
-from .serializers import SendOtpBodySerializer
+from authentication.serializers.send_otp_body_serializer import SendOtpBodySerializer
+from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
 
 
 # Create your views here.
 class SendOTPView(APIView):
+    @validate_unexpected_fields(SendOtpBodySerializer)
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
@@ -63,10 +64,14 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
-    # @validate_request_body(['phone_number', 'otp'])
+    @validate_unexpected_fields(VerifyOTPBodySerializer)
+    @validate_request(VerifyOTPBodySerializer)
     def post(self, request):
-        phone_number = request.data.get('phone_number')
-        otp = request.data.get('otp')
+        validated_data = request.validated_data
+        phone_number = validated_data['phone_number']
+        otp = validated_data['otp']
+
+
         try:
             user = User.objects.get(phone_number=phone_number)
             otp_entry = user.otp

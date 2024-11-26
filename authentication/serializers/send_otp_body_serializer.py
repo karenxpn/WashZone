@@ -4,16 +4,6 @@ import phonenumbers
 class SendOtpBodySerializer(serializers.Serializer):
     phone_number = serializers.CharField(required=True)
 
-    def to_internal_value(self, data):
-        # Ensure only defined fields are present
-        unexpected_fields = [key for key in data if key not in self.fields]
-        if unexpected_fields:
-            raise serializers.ValidationError(
-                {"error": "Unexpected fields: {}".format(unexpected_fields)}
-            )
-        return super().to_internal_value(data)
-
-
     def run_validation(self, data):
         try:
             # Run the standard validation logic
