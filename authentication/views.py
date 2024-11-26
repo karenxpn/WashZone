@@ -37,7 +37,7 @@ class SendOTPView(APIView):
 
         otp = str(random.randint(100000, 999999))
 
-        otp_entry, created = PhoneOTP.objects.update_or_create(
+        _, _ = PhoneOTP.objects.update_or_create(
             user=user,
             defaults={
                 'otp': otp,
@@ -51,7 +51,7 @@ class SendOTPView(APIView):
 
         try:
             client = Client(account_sid, auth_token)
-            message = client.messages.create(
+            _ = client.messages.create(
                 messaging_service_sid=os.environ.get('MESSAGING_SERVICE_SID'),
                 body=f'Your OTP for Wash Zone is {otp}',
                 to=phone_number,
