@@ -4,7 +4,15 @@ from rest_framework.views import APIView
 
 # Create your views here.
 class UserDetailView(APIView):
-    permission_classes = (IsAuthenticated,)
-    def get(self, request, *args, **kwargs):
-        return Response({'phone': request.user.phone_number,
-                         'email': 'the email here'})
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            'phone': request.user.phone_number,
+            'email': 'the email here'
+        })
+
+    def post(self, request):
+        return Response({
+            'request': 'post request',
+        })
