@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .decorators import validate_request, validate_unexpected_fields
 
-from authentication.models import User, PhoneOTP
+from authentication.models import PhoneOTP
+from user.models import User
 from twilio.rest import Client
 
 from .serializers.send_otp_body_serializer import SendOtpBodySerializer

@@ -1,16 +1,7 @@
 from django.utils.timezone import now
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 import datetime
-
-# Create your models here.
-class User(AbstractUser):
-    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
-    is_phone_verified = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.username
-
+from user.models import User
 
 class PhoneOTP(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='otp')
