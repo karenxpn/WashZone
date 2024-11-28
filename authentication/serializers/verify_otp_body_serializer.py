@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from authentication.validators.additional_fields_validation import additional_fields_validation
 from authentication.validators.phone_number_validation import phone_number_validator
 
 
@@ -14,3 +16,6 @@ class VerifyOTPBodySerializer(serializers.Serializer):
         if not value.isdigit():
             raise serializers.ValidationError("OTP must contain only numeric characters.")
         return value
+
+    def validate(self, data):
+        return additional_fields_validation(self, data)

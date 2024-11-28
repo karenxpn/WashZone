@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .decorators import validate_request, validate_unexpected_fields
+from .decorators import validate_request
 
 from authentication.models import PhoneOTP
 from user.models import User
@@ -18,7 +18,6 @@ from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
 
 # Create your views here.
 class SendOTPView(APIView):
-    @validate_unexpected_fields(SendOtpBodySerializer)
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
         print(request.data)
@@ -67,7 +66,6 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
-    @validate_unexpected_fields(VerifyOTPBodySerializer)
     @validate_request(VerifyOTPBodySerializer)
     def post(self, request):
         validated_data = request.validated_data

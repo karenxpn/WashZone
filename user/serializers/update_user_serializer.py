@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from authentication.validators.additional_fields_validation import additional_fields_validation
 from user.models import User
 import re
 
@@ -36,3 +38,6 @@ class UpdateUserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Last name must be at least 3 characters')
 
         return last_name
+
+    def validate(self, data):
+        return additional_fields_validation(self, data)
