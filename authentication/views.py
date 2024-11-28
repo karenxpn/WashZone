@@ -51,12 +51,12 @@ class SendOTPView(APIView):
         auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
 
         try:
-            client = Client(account_sid, auth_token)
-            _ = client.messages.create(
-                messaging_service_sid=os.environ.get('MESSAGING_SERVICE_SID'),
-                body=f'Your OTP for Wash Zone is {otp}',
-                to=phone_number,
-            )
+            # client = Client(account_sid, auth_token)
+            # _ = client.messages.create(
+            #     messaging_service_sid=os.environ.get('MESSAGING_SERVICE_SID'),
+            #     body=f'Your OTP for Wash Zone is {otp}',
+            #     to=phone_number,
+            # )
 
             return Response({'otp': otp}, status=status.HTTP_200_OK)
 
