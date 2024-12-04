@@ -7,4 +7,3 @@ class SendOtpBodySerializer(serializers.Serializer):
 
     def validate_phone_number(self, value):
         return phone_number_validator(value)
-
