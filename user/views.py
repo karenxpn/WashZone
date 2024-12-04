@@ -26,3 +26,12 @@ class UserDetailView(APIView):
         return Response({
             'message': 'Profile updated successfully',
         }, status=status.HTTP_200_OK)
+
+
+    # DELETE: Delete the user
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        user.delete()
+        return Response({
+            "message": "User deleted successfully."
+        }, status=status.HTTP_204_NO_CONTENT)
