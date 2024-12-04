@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'authentication',
-    'service_category',
+    'services',
     'rest_framework',
     'twilio',
 ]
