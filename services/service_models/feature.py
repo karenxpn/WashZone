@@ -1,4 +1,4 @@
-# service provided by the provider
+# features that the service includes or can be added
 from django.db import models
 
 
