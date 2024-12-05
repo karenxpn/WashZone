@@ -1,5 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from authentication.decorators import validate_request
 from services.serializers.category_serializer import CategorySerializer, CategoryUpdateSerializer
@@ -33,4 +34,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         # Handles partial updates (PATCH)
         return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response(
+            {'message': 'Category deleted'},
+            status=status.HTTP_200_OK
+        )
 
