@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -6,40 +7,33 @@ from authentication.decorators import validate_request
 from services.serializers.category_serializer import CategorySerializer, CategoryUpdateSerializer
 from services.service_models.category import Category
 
-
+# add permissions
+# create if the user is in staff
+# update and delete if the category belongs to the user
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-
     queryset = Category.objects.all()
 
     def get_serializer_class(self):
-        if self.action == 'create':
-            return CategorySerializer
-        elif self.action in ['update', 'partial_update']:
-            return CategoryUpdateSerializer
-        return CategorySerializer
-
+        return CategoryUpdateSerializer if self.action in ['update', 'partial_update'] else CategorySerializer
 
     @validate_request(CategorySerializer)
     def create(self, request, *args, **kwargs):
-        # The decorator will validate and handle errors for this method
         return super().create(request, *args, **kwargs)
 
     @validate_request(CategoryUpdateSerializer)
     def update(self, request, *args, **kwargs):
-        # Apply the decorator to handle update requests
         return super().update(request, *args, **kwargs)
 
     @validate_request(CategoryUpdateSerializer)
     def partial_update(self, request, *args, **kwargs):
-        # Handles partial updates (PATCH)
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-        return Response(
-            {'message': 'Category deleted'},
-            status=status.HTTP_200_OK
-        )
+        try:
+            instance = self.get_object()  # Get the object to be deleted
+            self.perform_destroy(instance)  # Delete the object
+            return Response({"message": "Category deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except NotFound:
+            return Response({"message": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
 
