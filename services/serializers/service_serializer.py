@@ -6,3 +6,12 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = '__all__'
 
+class ServiceUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+        extra_kwargs = {
+            'name': {'required': False},
+            'provider': {'required': False},
+        }
+
