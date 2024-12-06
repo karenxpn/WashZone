@@ -9,8 +9,8 @@ class Provider(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     address = models.TextField()
-    contact_number = models.CharField(max_length=15)
-    email = models.EmailField(unique=True)
+    contact_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
 
     rating = models.FloatField(
         default=0,
