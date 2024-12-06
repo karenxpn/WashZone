@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
@@ -19,7 +20,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @validate_request(CategorySerializer)
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError as e:
+            if 'unique constraint' in str(e):
+                return Response({"message": "A category with this information already exists."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     @validate_request(CategoryUpdateSerializer)
     def update(self, request, *args, **kwargs):
