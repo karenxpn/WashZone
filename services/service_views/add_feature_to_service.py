@@ -12,7 +12,7 @@ def add_feature_to_service(self, request):
     extra_cost = request.data.get('extra_cost', 0)
 
     if not feature_id:
-        return Response({"error": "Feature ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Feature ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         # Ensure the feature exists
@@ -35,4 +35,4 @@ def add_feature_to_service(self, request):
         return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     except Feature.DoesNotExist:
-        return Response({"error": "Feature not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Feature not found."}, status=status.HTTP_404_NOT_FOUND)
