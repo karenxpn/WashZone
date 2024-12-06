@@ -43,8 +43,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
             service_feature, created = ServiceFeature.objects.get_or_create(
                 service=service,
                 feature=feature,
-                name=feature.name,
-                description=feature.description,
                 defaults={'is_included': is_included, 'extra_cost': extra_cost}
             )
 

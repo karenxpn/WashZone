@@ -26,9 +26,6 @@ class ServiceFeature(models.Model):
         help_text="Extra cost for the feature if it's optional"
     )
 
-    name = models.CharField(max_length=100, default="")
-    description = models.TextField(blank=True, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
