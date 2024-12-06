@@ -5,3 +5,8 @@ class FeatureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feature
         fields = '__all__'
+
+class FeatureUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feature
+        fields = '__all__'
