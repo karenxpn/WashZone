@@ -9,9 +9,6 @@ from authentication.decorators import validate_request
 from services.serializers.category_serializer import CategorySerializer, CategoryUpdateSerializer
 from services.service_models.category import Category
 
-# add permissions
-# create if the user is in staff
-# update and delete if the category belongs to the user
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()
