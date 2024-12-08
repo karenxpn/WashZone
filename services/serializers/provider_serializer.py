@@ -14,6 +14,7 @@ class ProviderUpdateSerializer(serializers.ModelSerializer):
         model = Provider
         fields = '__all__'
         extra_kwargs = {
+            'owner': {'required': False},
             'name': {'required': False},
             'description': {'required': False},
             'address': {'required': False},

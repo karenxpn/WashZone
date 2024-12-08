@@ -17,9 +17,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return CategoryUpdateSerializer if self.action in ['update', 'partial_update'] else CategorySerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update']:
-            return [IsSuperAdmin()]
-        return super().get_permissions()
+        return [IsSuperAdmin()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
 
     @validate_request(CategorySerializer)
     def create(self, request, *args, **kwargs):
