@@ -8,6 +8,7 @@ from authentication.decorators import validate_request
 from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer
 from services.service_models.service import Service
 from services.service_views.add_feature_to_service import add_feature_to_service
+from services.service_views.remove_feature_from_service import remove_feature
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
@@ -27,6 +28,10 @@ class ServiceViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='add-feature')
     def add_feature(self, request, pk=None):
         return add_feature_to_service(self, request)
+
+    @action(detail=True, methods=['delete'], url_path='remove-feature')
+    def remove_feature(self, request, pk=None):
+        return remove_feature(self, request)
 
     @validate_request(ServiceSerializer)
     def create(self, request, *args, **kwargs):
