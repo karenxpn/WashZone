@@ -4,6 +4,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from WashZone.permissions import IsSuperAdmin
 from authentication.decorators import validate_request
 from services.serializers.category_serializer import CategorySerializer, CategoryUpdateSerializer
 from services.service_models.category import Category
@@ -17,6 +18,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return CategoryUpdateSerializer if self.action in ['update', 'partial_update'] else CategorySerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return [IsSuperAdmin()]
+        return super().get_permissions()
 
     @validate_request(CategorySerializer)
     def create(self, request, *args, **kwargs):
