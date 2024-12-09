@@ -1,4 +1,3 @@
-from django.db.models import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -8,7 +7,6 @@ from rest_framework.response import Response
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
 from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer
-from services.service_models.feature import ServiceFeature
 from services.service_models.service import Service
 from services.service_views.add_feature_to_service import add_feature_to_service
 from services.service_views.remove_feature_from_service import remove_feature
