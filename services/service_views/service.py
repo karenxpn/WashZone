@@ -14,7 +14,7 @@ from services.service_views.update_linked_feature import update_feature
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()  # Add this to resolve the basename issue
+    queryset = Service.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -26,8 +26,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         provider_id = self.request.query_params.get('provider_id', None)
         if provider_id:
-            return Service.objects.filter(provider_id=provider_id)
-        return Service.objects.all()
+            return Service.objects.filter(provider_id=provider_id).prefetch_related('features__feature')
+        return Service.objects.prefetch_related('features__feature')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
