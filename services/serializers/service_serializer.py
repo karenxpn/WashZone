@@ -19,5 +19,7 @@ class ServiceUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'name': {'required': False},
             'provider': {'required': False},
+            'base_price': {'required': False},
+            'duration_in_minutes': {'required': False},
         }
 
