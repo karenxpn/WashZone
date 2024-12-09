@@ -37,3 +37,5 @@ def update_feature(self, request, pk=None):
 
     except ServiceFeature.DoesNotExist:
         return Response({"message": "The feature is not linked to this service."}, status=status.HTTP_404_NOT_FOUND)
+    except Feature.DoesNotExist:
+        return Response({'message': 'The feature is not found.'}, status=status.HTTP_404_NOT_FOUND)

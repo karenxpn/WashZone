@@ -31,6 +31,7 @@ def add_feature_to_service(self, request):
         validate_ownership(user=request.user, service=service, feature=feature, service_feature=service_feature)
 
         service_feature, created = ServiceFeature.objects.update_or_create(
+            owner=request.user,
             service=service,
             feature=feature,
             defaults={'is_included': is_included, 'extra_cost': extra_cost}
