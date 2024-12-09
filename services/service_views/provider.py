@@ -5,6 +5,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
 from services.serializers.provider_serializer import ProviderUpdateSerializer, ProviderSerializer
 from services.service_models.provider import Provider
@@ -17,6 +18,11 @@ class ProviderViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         return ProviderUpdateSerializer if self.action in ['update', 'partial_update'] else ProviderSerializer
 
+    def get_permissions(self):
+        return [IsOwner()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
     @validate_request(ProviderSerializer)
     def create(self, request, *args, **kwargs):
