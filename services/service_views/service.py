@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
 from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer
+from services.service_models.feature import ServiceFeature
 from services.service_models.service import Service
 from services.service_views.add_feature_to_service import add_feature_to_service
 from services.service_views.remove_feature_from_service import remove_feature
@@ -14,7 +16,7 @@ from services.service_views.update_linked_feature import update_feature
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()  # Add this to resolve the basename issue
+    queryset = Service.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -26,8 +28,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         provider_id = self.request.query_params.get('provider_id', None)
         if provider_id:
-            return Service.objects.filter(provider_id=provider_id)
-        return Service.objects.all()
+            return Service.objects.filter(provider_id=provider_id).prefetch_related('features__feature')
+        return Service.objects.prefetch_related('features__feature')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

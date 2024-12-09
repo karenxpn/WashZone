@@ -23,4 +23,5 @@ urlpatterns = [
        path('auth/', include('authentication.urls')),
        path('', include('user.urls')),
        path('', include('services.urls')),
+       path('silk/', include('silk.urls', namespace='silk')),
 ]
