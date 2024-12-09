@@ -21,6 +21,9 @@ class ProviderViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         return [IsOwner()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     @validate_request(ProviderSerializer)
     def create(self, request, *args, **kwargs):
         try:

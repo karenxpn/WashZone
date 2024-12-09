@@ -5,6 +5,7 @@ from .service_feature_serializer import ServiceFeatureSerializer
 
 class ServiceSerializer(serializers.ModelSerializer):
     features = ServiceFeatureSerializer(many=True, read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.phone_number')  # Ensure the owner is read-only
 
     class Meta:
         model = Service
@@ -17,7 +18,7 @@ class ServiceUpdateSerializer(serializers.ModelSerializer):
         model = Service
         fields = '__all__'
         extra_kwargs = {
-            'owner': {'required': False},
+            'owner': {'read_only': True},
             'name': {'required': False},
             'provider': {'required': False},
             'base_price': {'required': False},

@@ -29,6 +29,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
             return Service.objects.filter(provider_id=provider_id)
         return Service.objects.all()
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
     @action(detail=True, methods=['post'], url_path='add-feature')
     def add_feature(self, request, pk=None):

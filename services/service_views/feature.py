@@ -3,6 +3,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
 from services.serializers.feature_serializer import FeatureSerializer, FeatureUpdateSerializer
 from services.service_models.feature import Feature
@@ -14,6 +15,12 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return FeatureUpdateSerializer if self.action in ['update', 'partial_update'] else FeatureSerializer
+
+    def get_permissions(self):
+        return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
     @validate_request(FeatureSerializer)
     def create(self, request, *args, **kwargs):

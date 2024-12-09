@@ -2,9 +2,11 @@
 from django.db import models
 
 from services.service_models.service import Service
+from user.models import User
 
 
 class Feature(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='features')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -18,6 +20,7 @@ class Feature(models.Model):
 # intermediate model for the feature and service ( many-to-many relationship)
 
 class ServiceFeature(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_features')
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='features')
     feature = models.ForeignKey(Feature, on_delete=models.CASCADE, related_name='services')
     is_included = models.BooleanField(default=False)
