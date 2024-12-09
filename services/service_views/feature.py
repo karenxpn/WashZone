@@ -19,6 +19,9 @@ class FeatureViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
 
+    def get_queryset(self):
+        return Feature.objects.filter(owner=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
