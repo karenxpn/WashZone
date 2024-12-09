@@ -17,6 +17,7 @@ class ServiceUpdateSerializer(serializers.ModelSerializer):
         model = Service
         fields = '__all__'
         extra_kwargs = {
+            'owner': {'required': False},
             'name': {'required': False},
             'provider': {'required': False},
             'base_price': {'required': False},
