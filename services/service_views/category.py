@@ -1,5 +1,6 @@
 from django.db import IntegrityError
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from WashZone.permissions import IsSuperAdmin
 from authentication.decorators import validate_request
 from services.serializers.category_serializer import CategorySerializer, CategoryUpdateSerializer
+from services.serializers.provider_serializer import ProviderSerializer
 from services.service_models.category import Category
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -28,6 +30,16 @@ class CategoryViewSet(viewsets.ModelViewSet):
                 return Response({"message": "A category with this information already exists."}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"message": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def providers(self, request, pk=None):
+        try:
+            category = self.get_object()
+            providers = category.providers.all()
+            serializer = ProviderSerializer(providers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Category.DoesNotExist:
+            return Response({"message": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
 
     @validate_request(CategoryUpdateSerializer)
     def update(self, request, *args, **kwargs):
