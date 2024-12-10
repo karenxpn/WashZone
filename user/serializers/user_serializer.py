@@ -12,7 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
                   'phone_number',
                   'full_name',
                   'email_promotions_enabled',
-                  'notifications_enabled')
+                  'notifications_enabled',
+                  'location')
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip()

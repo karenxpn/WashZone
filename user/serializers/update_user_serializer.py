@@ -1,10 +1,14 @@
 from rest_framework import serializers
+from django.contrib.gis.geos import Point
 from user.models import User
 import re
 
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
+    latitude = serializers.FloatField(required=False)
+    longitude = serializers.FloatField(required=False)
+
     class Meta:
         model = User
         fields = (
@@ -12,7 +16,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             'email_promotions_enabled',
             'first_name',
             'last_name',
-            'notifications_enabled'
+            'notifications_enabled',
+            'latitude',
+            'longitude',
         )
 
     # validations
@@ -36,3 +42,17 @@ class UpdateUserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Last name must be at least 3 characters')
 
         return last_name
+
+    def validate(self, data):
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+
+        if latitude is not None and longitude is not None:
+            if not (-90 <= latitude <= 90):
+                raise serializers.ValidationError("Latitude must be between -90 and 90.")
+            if not (-180 <= longitude <= 180):
+                raise serializers.ValidationError("Longitude must be between -180 and 180.")
+
+            data['location'] = Point(longitude, latitude)
+
+        return data
