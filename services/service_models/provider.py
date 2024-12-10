@@ -1,3 +1,4 @@
+from django.contrib.gis.db.models import PointField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -13,6 +14,7 @@ class Provider(models.Model):
     address = models.TextField()
     contact_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
+    location = PointField(null=True, blank=True)
 
     rating = models.FloatField(
         default=0,
