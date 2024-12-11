@@ -7,6 +7,7 @@ class ProviderSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.phone_number')
     latitude = serializers.SerializerMethodField()
     longitude = serializers.SerializerMethodField()
+    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = Provider
@@ -20,6 +21,11 @@ class ProviderSerializer(serializers.ModelSerializer):
 
     def get_longitude(self, obj):
         return obj.location.x if obj.location else None
+
+    def get_distance(self, obj):
+        if hasattr(obj, 'distance') and obj.distance is not None:
+            return round(obj.distance.m, 2)
+        return None
 
 
 class ProviderUpdateSerializer(serializers.ModelSerializer):
