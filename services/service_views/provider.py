@@ -1,3 +1,4 @@
+from django.contrib.gis.db.models.functions import Distance
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from rest_framework import viewsets, status
@@ -20,6 +21,12 @@ class ProviderViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         return [IsOwner()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.location:
+            return Provider.objects.annotate(distance=Distance('location', user.location)).order_by('distance')
+        return Provider.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
