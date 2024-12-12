@@ -28,21 +28,21 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        included_features = instance.features.filter(is_included=True).select_related('feature')
-        serializer = self.get_serializer(instance)
-        response_data = serializer.data
-        response_data['features'] = ServiceFeatureSerializer(included_features, many=True).data
-        return Response(response_data)
-
 
     def get_queryset(self):
         provider_id = self.request.query_params.get('provider_id', None)
-        queryset = Service.objects.all()
+        feature_queryset = ServiceFeature.objects.filter(is_included=True).select_related('feature')
+
+        if self.action == 'retrieve':
+            queryset = Service.objects.prefetch_related(
+                Prefetch('features', queryset=feature_queryset)
+            )
+        else:
+            queryset = Service.objects.all()
 
         if provider_id:
             queryset = queryset.filter(provider_id=provider_id)
+
         return queryset
 
     def perform_create(self, serializer):
