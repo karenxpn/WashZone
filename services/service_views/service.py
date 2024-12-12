@@ -31,12 +31,10 @@ class ServiceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         provider_id = self.request.query_params.get('provider_id', None)
-        feature_queryset = ServiceFeature.objects.filter(is_included=True).select_related('feature')
 
         if self.action == 'retrieve':
-            queryset = Service.objects.prefetch_related(
-                Prefetch('features', queryset=feature_queryset)
-            )
+            feature_queryset = ServiceFeature.objects.filter(is_included=True).select_related('feature')
+            queryset = Service.objects.prefetch_related(Prefetch('features', queryset=feature_queryset))
         else:
             queryset = Service.objects.all()
 
