@@ -11,6 +11,13 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = '__all__'
 
+class ServiceListSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.phone_number')
+
+    class Meta:
+        model = Service
+        fields = '__all__'
+
 class ServiceUpdateSerializer(serializers.ModelSerializer):
     features = ServiceFeatureSerializer(many=True, read_only=True)
 

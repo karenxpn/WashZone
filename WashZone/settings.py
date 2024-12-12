@@ -150,6 +150,8 @@ AUTH_USER_MODEL = 'user.User'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'WashZone.exception.custom_exception_handler',
+    'DEFAULT_PAGINATION_CLASS': 'WashZone.custom_list_pagination.CustomListPagination',
+    'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),

@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -6,7 +7,9 @@ from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
-from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer
+from services.serializers.service_feature_serializer import ServiceFeatureSerializer
+from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer, ServiceListSerializer
+from services.service_models.feature import ServiceFeature
 from services.service_models.service import Service
 from services.service_views.add_feature_to_service import add_feature_to_service
 from services.service_views.remove_feature_from_service import remove_feature
@@ -18,19 +21,40 @@ class ServiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
+        if self.action == 'list':
+            return ServiceListSerializer
         return ServiceUpdateSerializer if self.action in ['update', 'partial_update'] else ServiceSerializer
 
     def get_permissions(self):
         return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
 
+
     def get_queryset(self):
         provider_id = self.request.query_params.get('provider_id', None)
+
+        if self.action == 'retrieve':
+            feature_queryset = ServiceFeature.objects.filter(is_included=True).select_related('feature')
+            queryset = Service.objects.prefetch_related(Prefetch('features', queryset=feature_queryset))
+        else:
+            queryset = Service.objects.all()
+
         if provider_id:
-            return Service.objects.filter(provider_id=provider_id).prefetch_related('features__feature')
-        return Service.objects.prefetch_related('features__feature')
+            queryset = queryset.filter(provider_id=provider_id)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    @action(detail=True, methods=['get'], url_path='additional-features')
+    def additional_features(self, request, pk=None):
+        try:
+            service = self.get_object()
+            excluded_features = service.features.filter(is_included=False).select_related('feature')
+            serializer = ServiceFeatureSerializer(excluded_features, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Service.DoesNotExist:
+            return Response({"message": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['post'], url_path='add-feature')
     def add_feature(self, request, pk=None):
