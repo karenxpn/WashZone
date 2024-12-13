@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'user',
     'authentication',
     'services',
+    'orders',
     'rest_framework',
     'twilio',
     'silk',
