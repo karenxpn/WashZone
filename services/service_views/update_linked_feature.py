@@ -36,6 +36,8 @@ def update_feature(self, request, pk=None):
 
         if is_included:
             service_feature.extra_cost = 0
+        elif not is_included and extra_cost is None:
+            service_feature.extra_cost = feature.cost
 
 
         service_feature.save()  # Save the changes
