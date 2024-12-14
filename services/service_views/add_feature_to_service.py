@@ -27,8 +27,10 @@ def add_feature_to_service(self, request):
     try:
         feature = Feature.objects.get(pk=feature_id)
 
-        if extra_cost == 0 and is_included == False:
+        if extra_cost == 0 and not is_included:
             extra_cost = feature.cost
+        elif is_included:
+            extra_cost = 0
 
         service_feature = ServiceFeature.objects.filter(service=service, feature=feature).first()
         validate_ownership(user=request.user, service=service, feature=feature, service_feature=service_feature)
