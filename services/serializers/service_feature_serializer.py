@@ -17,6 +17,7 @@ class ServiceFeatureSerializer(serializers.ModelSerializer):
             'feature_name',
             'description',
             'extra_cost',
+            'extra_time_in_minutes',
             'created_at',
             'updated_at',
         )
