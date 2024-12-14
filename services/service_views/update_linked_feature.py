@@ -30,6 +30,10 @@ def update_feature(self, request, pk=None):
         if extra_cost is not None:
             service_feature.extra_cost = extra_cost
 
+        if is_included:
+            service_feature.extra_cost = 0
+
+
         service_feature.save()  # Save the changes
 
         serializer = ServiceFeatureSerializer(service_feature)
