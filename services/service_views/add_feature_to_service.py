@@ -19,7 +19,7 @@ def add_feature_to_service(self, request):
     service = self.get_object()
     feature_id = request.data.get('feature_id')
     is_included = request.data.get('is_included', False)
-    extra_cost = request.data.get('extra_cost', 0)
+    extra_cost = request.data.get('extra_cost', None)
 
     if not feature_id:
         return Response({"message": "Feature ID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -27,7 +27,7 @@ def add_feature_to_service(self, request):
     try:
         feature = Feature.objects.get(pk=feature_id)
 
-        if extra_cost == 0 and not is_included:
+        if extra_cost is None and not is_included:
             extra_cost = feature.cost
         elif is_included:
             extra_cost = 0
