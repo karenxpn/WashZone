@@ -1,3 +1,45 @@
 from django.shortcuts import render
+from rest_framework import viewsets, status
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from authentication.decorators import validate_request
+from orders.order_models.order import Order
+from orders.serializers.create_order_serializer import CreateOrderSerializer
+from orders.serializers.order_serializer import OrderSerializer
+from orders.serializers.update_order_serializer import UpdateOrderSerializer
+
 
 # Create your views here.
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update']:
+            return UpdateOrderSerializer
+        if self.action in ['create']:
+            return CreateOrderSerializer
+        return OrderSerializer
+
+
+    @validate_request(UpdateOrderSerializer)
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @validate_request(UpdateOrderSerializer)
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"message": "Order deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except NotFound:
+            return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
