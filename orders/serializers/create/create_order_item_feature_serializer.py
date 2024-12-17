@@ -27,45 +27,28 @@ class CreateOrderItemFeatureSerializer(serializers.ModelSerializer):
         return representation
 
     def create(self, validated_data):
+
+        order_item_pk = self.context.get('order_item')
+        if not order_item_pk:
+            raise serializers.ValidationError("Order item context is required")
+
         try:
-            feature = validated_data['feature']
-            order_item_pk = self.context.get('order_item')
+            order_item = OrderItem.objects.select_related('service').get(pk=order_item_pk)
+            service = order_item.service
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError("Invalid order item")
 
-            try:
-                order_item = OrderItem.objects.select_related('service').get(pk=order_item_pk)
-                service = order_item.service
-            except ObjectDoesNotExist:
-                raise ValidationError("Invalid order item")
+        feature = validated_data['feature']
 
-            try:
-                # Find service feature
-                service_feature = ServiceFeature.objects.filter(
-                    service=service,
-                    feature=feature.id,
-                ).first()
+        service_feature = ServiceFeature.objects.filter(
+            service=service,
+            feature=feature.id
+        ).first()
 
-                # Calculate extra cost
-                validated_data['extra_cost'] = (
-                    service_feature.extra_cost
-                    if service_feature and not service_feature.is_included
-                    else 0
-                )
-            except Exception:
-                validated_data['extra_cost'] = 0
+        extra_cost = service_feature.extra_cost if service_feature and not service_feature.is_included else 0
 
-            try:
-                # Create order item feature
-                order_item_feature = OrderItemFeature.objects.create(
-                    order_item=order_item,
-                    feature=feature,
-                    extra_cost=validated_data['extra_cost'],
-                )
-            except Exception:
-                raise ValidationError("Failed to create order item feature")
-
-            return order_item_feature
-
-        except ValidationError:
-            raise
-        except Exception:
-            raise ValidationError("Failed to create order item feature")
+        return OrderItemFeature.objects.create(
+            order_item=order_item,
+            feature=feature,
+            extra_cost=extra_cost
+        )
