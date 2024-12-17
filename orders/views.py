@@ -33,7 +33,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(owner=self.request.user)
 
     @validate_request(CreateOrderSerializer)
     def create(self, request, *args, **kwargs):

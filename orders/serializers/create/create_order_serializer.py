@@ -5,7 +5,7 @@ from orders.serializers.create.create_order_item_serializer import CreateOrderIt
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.phone_number')
+    owner = serializers.ReadOnlyField(source='owner.phone_number')
     items = CreateOrderItemSerializer(many=True)
     total_price = serializers.SerializerMethodField()
 
@@ -14,7 +14,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['user', 'items', 'total_price']
+        fields = ['owner', 'items', 'total_price']
 
 
     def to_representation(self, instance):
@@ -41,16 +41,17 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             }
 
             features_data = item.get('features', [])
-            item_data['features'] = [
-                {'feature': feature['feature'].id for feature in features_data},
-            ]
+            if features_data:
+                item_data['features'] = [
+                    {'feature': feature['feature'].id for feature in features_data},
+                ]
 
             item_serializer = CreateOrderItemSerializer(
                 data=item_data,
                 context={'order': order}
             )
 
-            item_serializer.is_valid(raise_exception=True)
+            item_serializer.is_valid(raise_exception=False)
             item_serializer.save()
 
         return order
