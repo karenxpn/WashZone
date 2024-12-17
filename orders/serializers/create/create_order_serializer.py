@@ -27,34 +27,25 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         fields = ['user', 'items', 'total_price']
 
     def to_representation(self, instance):
-        try:
-            representation = super().to_representation(instance)
+        representation = super().to_representation(instance)
 
-            try:
-                items = instance.items.prefetch_related(
-                    'order_item_features',
-                    'service',
-                    'provider'
-                ).all()
+        items = instance.items.prefetch_related(
+            'order_item_features',
+            'service',
+            'provider'
+        ).all()
 
-                representation['items'] = CreateOrderItemSerializer(items, many=True).data
-            except Exception:
-                representation['items'] = []
-
-            return representation
-        except Exception:
-            raise ValidationError({"detail": "Failed to represent order data"})
+        representation['items'] = CreateOrderItemSerializer(items, many=True).data
+        return representation
 
     def create(self, validated_data):
         try:
-            # Pop items data to avoid issues with nested creation
             items_data = validated_data.pop('items', [])
 
             try:
-                # Create the main order
                 order = Order.objects.create(**validated_data)
             except Exception:
-                raise ValidationError({"order": "Failed to create order"})
+                raise ValidationError("Failed to create order")
 
             # Process and create order items
             for item in items_data:
@@ -84,16 +75,16 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                     except serializers.ValidationError:
                         # Optionally delete the order if item creation fails
                         order.delete()
-                        raise ValidationError({"items": "Invalid order item data"})
+                        raise ValidationError("Invalid order item data")
                     except Exception:
                         # Optionally delete the order if item creation fails
                         order.delete()
-                        raise ValidationError({"items": "Failed to create order items"})
+                        raise ValidationError("Failed to create order items")
                 except ValidationError:
                     order.delete()
-                    raise ValidationError({"items": "Failed to create order items"})
+                    raise ValidationError("Failed to create order items")
 
             return order
 
         except Exception:
-            raise ValidationError({"detail": "Failed to create order"})
+            raise ValidationError("Failed to create order")
