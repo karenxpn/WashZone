@@ -19,7 +19,14 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['items'] = CreateOrderItemSerializer(instance.items.all(), many=True).data
+
+        items = instance.items.prefetch_related(
+            'order_item_features',
+            'service',
+            'provider'
+        ).all()
+
+        representation['items'] = CreateOrderItemSerializer(items, many=True).data
         return representation
 
 

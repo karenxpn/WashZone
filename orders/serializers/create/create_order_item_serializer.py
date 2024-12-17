@@ -33,7 +33,8 @@ class CreateOrderItemSerializer(serializers.ModelSerializer):
         service = data.get('service')
         provider = data.get('provider')
 
-        if not Service.objects.filter(pk=service.pk, provider_id=provider.id).exists():
+        service = Service.objects.select_related('provider').get(pk=service.pk)
+        if service.provider != provider:
             raise serializers.ValidationError('The service does not belong to the specified provider.')
 
         return data
@@ -51,7 +52,7 @@ class CreateOrderItemSerializer(serializers.ModelSerializer):
             provider=provider,
         )
 
-
+        order_item_features = []
         for feature in features_data:
             feature_data = {
                 'feature': feature['feature'].id,
