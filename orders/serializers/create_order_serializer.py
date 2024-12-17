@@ -18,12 +18,17 @@ class CreateOrderItemFeatureSerializer(serializers.ModelSerializer):
         fields = ['feature', 'extra_cost']
 
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['feature_id'] = instance.id
-        representation['feature_name'] = instance.name
-        representation['feature_description'] = instance.description
+        if isinstance(instance, OrderItemFeature):
+            representation = super().to_representation(instance)
+            representation['feature_id'] = instance.feature.id
+            representation['feature_name'] = instance.feature.name
+            representation['feature_description'] = instance.feature.description
+            representation['extra_cost'] = instance.extra_cost
 
-        return representation
+            return representation
+        else:
+            # Handle the case where instance is not of type OrderItemFeature (e.g., it's a Feature)
+            return super().to_representation(instance)
 
 
     def create(self, validated_data):
@@ -65,7 +70,7 @@ class CreateOrderItemSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         # Include related features via the reverse relationship
         representation['features'] = CreateOrderItemFeatureSerializer(
-            instance.features.all(), many=True
+            instance.order_item_features.all(), many=True
         ).data
 
         representation['service_id'] = instance.service.id
