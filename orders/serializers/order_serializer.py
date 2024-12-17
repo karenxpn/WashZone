@@ -14,26 +14,33 @@ class OrderItemFeatureSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(read_only=True)
-    service = ServiceSerializer(read_only=True)
-    features = OrderItemFeatureSerializer(read_only=True, many=True)
+    service_name = serializers.ReadOnlyField(source='service.name')
+    service_id = serializers.ReadOnlyField(source='service.id')
+    features = OrderItemFeatureSerializer(source='order_item_features', read_only=True, many=True)
 
     class Meta:
         model = OrderItem
         fields = [
-            'total_price',
             'provider',
-            'service',
+            'service_name',
+            'service_id',
             'features',
         ]
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True, read_only=True)
+    items = OrderItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, obj):
+        return sum(item.order_item_subtotal for item in obj.items.all())
+
 
     class Meta:
         model = Order
         fields = [
             'user',
             'status',
-            'order_items',
+            'items',
+            'total_price'
         ]
