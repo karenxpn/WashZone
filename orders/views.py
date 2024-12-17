@@ -14,7 +14,7 @@ from orders.serializers.update_order_serializer import UpdateOrderSerializer
 # Create your views here.
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.objects.prefetch_related('items__service', 'items__provider', 'items__features')
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -25,7 +25,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         return OrderSerializer
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user).order_by('-id')
+        queryset = Order.objects.filter(user=self.request.user).order_by('-id')
+        queryset = queryset.prefetch_related('items__service',
+                                             'items__provider',
+                                             'items__features')
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
