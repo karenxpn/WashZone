@@ -1,5 +1,4 @@
 from django.db import models
-from services.service_models.provider import Provider
 from user.models import User
 
 
@@ -13,16 +12,8 @@ class Order(models.Model):
         ('completed', 'Completed'),
     ], default='pending')
 
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def calculate_total_price(self):
-        return sum(item.total_price for item in self.items.all())
-
-    def save(self, *args, **kwargs):
-        self.total_price = self.calculate_total_price()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Reservation {self.id} by {self.user.username}'

@@ -15,7 +15,6 @@ from orders.serializers.update_order_serializer import UpdateOrderSerializer
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -24,7 +23,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.action in ['create']:
             return CreateOrderSerializer
         return OrderSerializer
+    #
+    # def get_queryset(self):
+    #     return Order.objects.filter(user=self.request.user).order_by('-id')
 
+
+    def perform_create(self, serializer):
+        print('perform_create')
+        serializer.save(user=self.request.user)
+
+    @validate_request(CreateOrderSerializer)
+    def create(self, request, *args, **kwargs):
+        print('create request')
+        return super().create(request, *args, **kwargs)
 
     @validate_request(UpdateOrderSerializer)
     def update(self, request, *args, **kwargs):

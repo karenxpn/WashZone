@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from WashZone.location_validation import validate_location
 from services.models import Provider
+from django.contrib.gis.geos import Point
+
 
 class ProviderSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.phone_number')
@@ -28,6 +30,27 @@ class ProviderSerializer(serializers.ModelSerializer):
         return None
 
 
+class CreateProviderSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.phone_number')
+    latitude = serializers.FloatField(write_only=True, required=True)
+    longitude = serializers.FloatField(write_only=True, required=True)
+
+    class Meta:
+        model = Provider
+        fields = [
+            'id', 'category', 'owner', 'name', 'description', 'address',
+            'contact_number', 'email', 'latitude', 'longitude', 'rating', 'number_of_reviews'
+        ]
+        read_only_fields = ['id', 'rating', 'number_of_reviews']
+
+    def create(self, validated_data):
+        latitude = validated_data.pop('latitude')
+        longitude = validated_data.pop('longitude')
+
+        validated_data['location'] = Point(longitude, latitude)
+        return Provider.objects.create(**validated_data)
+
+
 class ProviderUpdateSerializer(serializers.ModelSerializer):
     latitude = serializers.FloatField(required=False)
     longitude = serializers.FloatField(required=False)
@@ -47,6 +70,7 @@ class ProviderUpdateSerializer(serializers.ModelSerializer):
             'category': {'required': False},
             'latitude': {'required': False},
             'longitude': {'required': False},
+            'location': {'required': False},
         }
 
     def to_representation(self, instance):

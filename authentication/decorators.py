@@ -21,7 +21,7 @@ def validate_request(serializer_class):
             for field, messages in errors.items():
                 # Format the error message string
                 for message in messages:
-                    formatted_errors.append(f"{field}: {message.lower()}")
+                    formatted_errors.append(f"{field}: {message}")
 
             # raise the formatted error response
             raise ValidationError({"message": "\n".join(formatted_errors)})
