@@ -29,70 +29,46 @@ class CreateOrderItemSerializer(serializers.ModelSerializer):
         return representation
 
     def validate(self, data):
+        service = data.get('service')
+        provider = data.get('provider')
+
         try:
-            service = data.get('service')
-            provider = data.get('provider')
+            service = Service.objects.select_related('provider').get(pk=service.pk)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError('Invalid service selected')
 
-            try:
-                service = Service.objects.select_related('provider').get(pk=service.pk)
-            except ObjectDoesNotExist:
-                raise ValidationError('Invalid service selected')
+        if service.provider != provider:
+            raise serializers.ValidationError('The service does not belong to the specified provider.')
 
-            if service.provider != provider:
-                raise ValidationError('The service does not belong to the specified provider.')
-
-            return data
-        except ValidationError:
-            raise
-        except Exception:
-            raise ValidationError("Validation failed")
+        return data
 
     def create(self, validated_data):
-        try:
-            service = validated_data.get('service')
-            provider = validated_data.get('provider')
-            order = self.context.get('order')
+        service = validated_data.get('service')
+        provider = validated_data.get('provider')
+        order = self.context.get('order')
 
-            # Extract features data
-            features_data = validated_data.pop('features', [])
+        if not order:
+            raise serializers.ValidationError("Order context is required")
 
-            try:
-                # Create order item
-                order_item = OrderItem.objects.create(
-                    order=order,
-                    service=service,
-                    provider=provider,
-                )
-            except Exception:
-                raise ValidationError("Failed to create order item")
+        features_data = validated_data.pop('features', [])
 
-            # Process features
-            for feature in features_data:
-                try:
-                    feature_data = {
-                        'feature': feature['feature'].id,
-                    }
+        order_item = OrderItem.objects.create(
+            order=order,
+            service=service,
+            provider=provider
+        )
 
-                    # Validate and save each feature
-                    try:
-                        item_serializer = CreateOrderItemFeatureSerializer(
-                            data=feature_data,
-                            context={'order_item': order_item.id}
-                        )
-                        item_serializer.is_valid(raise_exception=True)
-                        item_serializer.save()
-                    except serializers.ValidationError:
-                        # If feature validation fails, delete the order item
-                        order_item.delete()
-                        raise ValidationError("Invalid feature data")
-                    except Exception:
-                        order_item.delete()
-                        raise ValidationError("Failed to create order item features")
-                except Exception:
-                    order_item.delete()
-                    raise ValidationError("Failed to create order item features")
+        # Process features
+        for feature in features_data:
+            feature_data = {
+                'feature': feature['feature'].id,
+            }
 
-            return order_item
+            feature_serializer = CreateOrderItemFeatureSerializer(
+                data=feature_data,
+                context={'order_item': order_item.id}
+            )
+            feature_serializer.is_valid(raise_exception=True)
+            feature_serializer.save()
 
-        except Exception:
-            raise ValidationError("Failed to create order item")
+        return order_item
