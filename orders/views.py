@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from authentication.decorators import validate_request
 from orders.order_models.order import Order
-from orders.serializers.create_order_serializer import CreateOrderSerializer
+from orders.serializers.create.create_order_serializer import CreateOrderSerializer
 from orders.serializers.order_serializer import OrderSerializer
 from orders.serializers.update_order_serializer import UpdateOrderSerializer
 
@@ -23,18 +23,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.action in ['create']:
             return CreateOrderSerializer
         return OrderSerializer
-    #
-    # def get_queryset(self):
-    #     return Order.objects.filter(user=self.request.user).order_by('-id')
 
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
-        print('perform_create')
         serializer.save(user=self.request.user)
 
     @validate_request(CreateOrderSerializer)
     def create(self, request, *args, **kwargs):
-        print('create request')
         return super().create(request, *args, **kwargs)
 
     @validate_request(UpdateOrderSerializer)
