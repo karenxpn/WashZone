@@ -3,15 +3,19 @@ from rest_framework import serializers
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
 
+
 class OrderFeatureSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='feature.id')
+    name = serializers.CharField(source='feature.name')
+    description = serializers.CharField(source='feature.description')
+
     class Meta:
         model = OrderFeature
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'extra_cost']
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    features = OrderFeatureSerializer(many=True, read_only=True)
-    total_price = serializers.SerializerMethodField()
+    features = OrderFeatureSerializer(source='order_features', many=True, read_only=True)
 
     class Meta:
         model = Order
@@ -22,5 +26,5 @@ class OrderSerializer(serializers.ModelSerializer):
             'service',
             'status',
             'features',
-            'total_price'
+            'order_total'
         ]

@@ -25,10 +25,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         return OrderSerializer
 
     def get_queryset(self):
-        queryset = Order.objects.filter(user=self.request.user).order_by('-id')
-        queryset = queryset.prefetch_related('items__service',
-                                             'items__provider',
-                                             'items__features')
+        queryset = Order.objects.filter(owner=self.request.user).order_by('-id')
+        queryset = (queryset
+                    .select_related('owner', 'service', 'provider')
+                    .prefetch_related('order_features__feature'))
 
         return queryset
 
