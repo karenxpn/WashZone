@@ -13,6 +13,12 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['owner', 'service', 'provider', 'features', 'order_total']
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['id'] = instance.id
+        return representation
+
+
     def validate(self, data):
         service = data.get('service')
         provider = data.get('provider')
