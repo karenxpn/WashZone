@@ -5,6 +5,7 @@ from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from .decorators import validate_request
 
@@ -83,6 +84,12 @@ class VerifyOTPView(APIView):
                 user.is_phone_verified = True
                 user.save()
                 otp_entry.delete()
+
+                try:
+                    for token in RefreshToken.objects.filter(user=user):
+                        BlacklistedToken.objects.get_or_create(token=token)
+                except Exception as e:
+                    pass  # Log the error if needed
 
                 refresh = RefreshToken.for_user(user)
                 return Response({
