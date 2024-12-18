@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from WashZone.permissions import IsOwnerOrProvider, IsOwner
 from authentication.decorators import validate_request
 from orders.order_models.order import Order
 from orders.serializers.create.create_order_serializer import CreateOrderSerializer
@@ -31,6 +32,16 @@ class OrderViewSet(viewsets.ModelViewSet):
                     .prefetch_related('order_features__feature'))
 
         return queryset
+
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            return [IsOwner()]
+
+        if self.action in ['update', 'partial_update', 'list', 'retrieve']:
+            return [IsOwnerOrProvider()]
+
+        return super().get_permissions()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
