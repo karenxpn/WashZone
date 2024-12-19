@@ -11,7 +11,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['owner', 'service', 'provider', 'features', 'order_total']
+        fields = ['owner', 'service', 'provider', 'features', 'order_total', 'order_duration']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -30,8 +30,16 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-        features_data = validated_data.pop('features', [])  # Extract features data
-        order = Order.objects.create(**validated_data)
+        features_data = validated_data.pop('features', [])
+        service = validated_data.get('service')
+
+        order = Order.objects.create(
+            **validated_data,
+            service_name=service.name,
+            service_description=service.description,
+            service_price=service.base_price,
+            service_duration=service.duration_in_minutes
+        )
         service = order.service
 
         order_features = []
@@ -55,7 +63,12 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 else 0
             )
 
-            order_features.append(OrderFeature(order=order, feature=feature, extra_cost=extra_cost, extra_duration=extra_duration))
+            order_features.append(OrderFeature(order=order,
+                                               feature=feature,
+                                               feature_name=feature.name,
+                                               feature_description=feature.description,
+                                               extra_cost=extra_cost,
+                                               extra_duration=extra_duration))
 
         OrderFeature.objects.bulk_create(order_features)
 
