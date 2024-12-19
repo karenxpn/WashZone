@@ -26,6 +26,7 @@ class Order(models.Model):
 
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Pending'),
+        ('time_confirmation', 'Time Confirmation'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled'),
@@ -44,6 +45,14 @@ class Order(models.Model):
     def order_duration(self):
         features_duration = sum(feature.extra_duration for feature in self.order_features.all())
         return self.service_duration + features_duration
+
+    def reserve(self):
+        if self.time_slot.is_available_for_duration(self.order_duration):
+            self.time_slot.reserve_slot()
+            self.status = 'time_confirmation'
+            self.save()
+            return True
+        return False
 
     def __str__(self):
         return f'Reservation {self.id} by {self.owner.username}'
