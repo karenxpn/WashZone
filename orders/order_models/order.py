@@ -1,4 +1,6 @@
 from django.db import models
+
+from orders.order_models.time_slot import TimeSlot
 from services.service_models.feature import Feature
 from services.service_models.provider import Provider
 from services.service_models.service import Service
@@ -19,6 +21,8 @@ class Order(models.Model):
 
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE, related_name="orders")
     features = models.ManyToManyField(Feature, through='OrderFeature', blank=True)
+    time_slot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE, null=True, blank=True)
+
 
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Pending'),
