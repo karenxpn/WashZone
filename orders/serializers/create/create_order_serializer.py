@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
+from orders.order_models.time_slot import TimeSlot
 from orders.serializers.create.create_order_feature_serializer import CreateOrderFeatureSerializer
 from services.service_models.feature import ServiceFeature
 
@@ -48,8 +49,20 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
         # validate the provided duration matches the actual duration
         requested_duration = (end_time - start_time).total_seconds() / 60
+        print('requested_duration', requested_duration)
+        print('total_duration', total_duration)
         if requested_duration != total_duration:
             raise serializers.ValidationError('The requested time slot duration does not match the service duration.')
+
+        overlapping_slots = TimeSlot.objects.filter(
+            provider=provider,
+            is_available=False,
+            start_time__lt=end_time,
+            end_time__gt=start_time,
+        )
+
+        if overlapping_slots.exists():
+            raise serializers.ValidationError('The requested time slot is not available.')
 
         return data
 
@@ -57,6 +70,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         features_data = validated_data.pop('features', [])
         service = validated_data.get('service')
+        start_time = validated_data.pop('start_time')
+        end_time = validated_data.pop('end_time')
 
         order = Order.objects.create(
             **validated_data,
