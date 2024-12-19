@@ -29,5 +29,12 @@ class Order(models.Model):
 
         return service_price + feature_price
 
+    @property
+    def order_duration(self):
+        service_duration = self.service.duration_in_minutes
+        features_duration = sum(feature.extra_duration for feature in self.order_features.all())
+
+        return service_duration + features_duration
+
     def __str__(self):
         return f'Reservation {self.id} by {self.owner.username}'

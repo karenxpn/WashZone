@@ -49,7 +49,13 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 else 0
             )
 
-            order_features.append(OrderFeature(order=order, feature=feature, extra_cost=extra_cost))
+            extra_duration =(
+                service_feature.extra_time_in_minutes
+                if service_feature and not service_feature.is_included
+                else 0
+            )
+
+            order_features.append(OrderFeature(order=order, feature=feature, extra_cost=extra_cost, extra_duration=extra_duration))
 
         OrderFeature.objects.bulk_create(order_features)
 

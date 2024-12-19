@@ -11,7 +11,7 @@ class OrderFeatureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderFeature
-        fields = ['id', 'name', 'description', 'extra_cost']
+        fields = ['id', 'name', 'description', 'extra_cost', 'extra_duration']
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -26,5 +26,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'service',
             'status',
             'features',
-            'order_total'
+            'order_total',
+            'order_duration'
         ]
