@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
@@ -8,10 +9,13 @@ from services.service_models.feature import ServiceFeature
 class CreateOrderSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.phone_number')
     features = CreateOrderFeatureSerializer(many=True, write_only=True)
+    start_time = serializers.DateTimeField(write_only=True)
+    end_time = serializers.DateTimeField(write_only=True)
+
 
     class Meta:
         model = Order
-        fields = ['owner', 'service', 'provider', 'features', 'order_total', 'order_duration']
+        fields = ['owner', 'service', 'provider', 'features', 'order_total', 'order_duration', 'start_time', 'end_time']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -22,9 +26,30 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     def validate(self, data):
         service = data.get('service')
         provider = data.get('provider')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        features = data.get('features', [])
+
+        if start_time <= timezone.now():
+            raise serializers.ValidationError('The start time must be in the future.')
 
         if service.provider != provider:
             raise serializers.ValidationError('The service does not belong to the specified provider.')
+
+
+        total_duration = service.duration_in_minutes
+        for feature_data in features:
+            feature = feature_data.get('feature')
+            service_feature = ServiceFeature.objects.get(service=service, feature=feature)
+
+            if service_feature and not service_feature.is_included:
+                total_duration += service_feature.extra_time_in_minutes
+
+
+        # validate the provided duration matches the actual duration
+        requested_duration = (end_time - start_time).total_seconds() / 60
+        if requested_duration != total_duration:
+            raise serializers.ValidationError('The requested time slot duration does not match the service duration.')
 
         return data
 
@@ -46,10 +71,10 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         for feature_data in features_data:
             feature = feature_data['feature']
 
-            service_feature = ServiceFeature.objects.filter(
+            service_feature = ServiceFeature.objects.get(
                 service=service,
                 feature=feature.id
-            ).first()
+            )
 
             extra_cost = (
                 service_feature.extra_cost
