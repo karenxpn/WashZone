@@ -49,10 +49,28 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
         # validate the provided duration matches the actual duration
         requested_duration = (end_time - start_time).total_seconds() / 60
-        print('requested_duration', requested_duration)
-        print('total_duration', total_duration)
         if requested_duration != total_duration:
             raise serializers.ValidationError('The requested time slot duration does not match the service duration.')
+
+        # validate the provided start and end hours match providers working hours
+        working_hours = provider.working_hours.filter(weekday=start_time.weekday())
+        valid_slot = False
+
+        for hours in working_hours:
+            working_start = start_time.replace(hour=hours.opening_time.hour, minute=hours.opening_time.minute)
+            working_end = start_time.replace(hour=hours.closing_time.hour, minute=hours.closing_time.minute)
+
+            if working_start <= start_time and end_time <= working_end:
+                valid_slot = True
+                break
+
+        if not valid_slot:
+            raise serializers.ValidationError('The requested time slot is outside the provider\'s working hours.')
+
+        special_closures = provider.special_closures.filter(date=start_time.date())
+
+        if special_closures.exists():
+            raise serializers.ValidationError('The provider is closed this day.')
 
         overlapping_slots = TimeSlot.objects.filter(
             provider=provider,
