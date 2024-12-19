@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
+from services.serializers.provider_serializer import ProviderSerializer
 
 
 class OrderFeatureSerializer(serializers.ModelSerializer):
@@ -29,6 +30,7 @@ class OrderServiceSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     features = OrderFeatureSerializer(source='order_features', many=True, read_only=True)
     service = OrderServiceSerializer(source='*', many=False, read_only=True)
+    provider = ProviderSerializer()
 
     class Meta:
         model = Order
