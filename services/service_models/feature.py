@@ -29,6 +29,10 @@ class ServiceFeature(models.Model):
         help_text="Extra cost for the feature if it's optional"
     )
 
+    extra_time_in_minutes = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

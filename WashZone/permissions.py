@@ -9,3 +9,7 @@ class IsOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
 
+
+class IsOwnerOrProvider(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user or obj.provider == request.user

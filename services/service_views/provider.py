@@ -1,5 +1,4 @@
 from django.contrib.gis.db.models.functions import Distance
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
@@ -8,7 +7,9 @@ from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
-from services.serializers.provider_serializer import ProviderUpdateSerializer, ProviderSerializer
+from services.serializers.provider_serializer import (ProviderUpdateSerializer,
+                                                      ProviderSerializer, \
+    CreateProviderSerializer)
 from services.service_models.provider import Provider
 
 
@@ -17,6 +18,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
+        if self.action == 'create':
+            return CreateProviderSerializer
         return ProviderUpdateSerializer if self.action in ['update', 'partial_update'] else ProviderSerializer
 
     def get_permissions(self):
@@ -36,6 +39,7 @@ class ProviderViewSet(viewsets.ModelViewSet):
         try:
             return super().create(request, *args, **kwargs)
         except IntegrityError as e:
+            print(e)
             if 'unique constraint' in str(e):
                 return Response({"message": "A provider with this information already exists."}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"message": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -11,6 +11,7 @@ def update_feature(self, request, pk=None):
     feature_id = request.data.get('feature_id')
     is_included = request.data.get('is_included')
     extra_cost = request.data.get('extra_cost')
+    extra_time_in_minutes = request.data.get('extra_time_in_minutes', 0)
 
     if not feature_id:
         return Response({"message": "Feature ID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -29,6 +30,15 @@ def update_feature(self, request, pk=None):
 
         if extra_cost is not None:
             service_feature.extra_cost = extra_cost
+
+        if extra_time_in_minutes is not None:
+            service_feature.extra_time_in_minutes = extra_time_in_minutes
+
+        if is_included:
+            service_feature.extra_cost = 0
+        elif not is_included and extra_cost is None:
+            service_feature.extra_cost = feature.cost
+
 
         service_feature.save()  # Save the changes
 
