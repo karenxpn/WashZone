@@ -1,4 +1,4 @@
-from django.utils import timezone
+from django.utils.timezone import now, localtime
 from rest_framework import serializers
 
 from orders.order_models.time_slot import TimeSlot
@@ -7,10 +7,10 @@ from services.service_models.feature import ServiceFeature
 
 def validate_time_slot(provider, service, data):
     features = data.get('features', [])
-    start_time = data.get('start_time')
-    end_time = data.get('end_time')
+    start_time = localtime(data.get('start_time'))
+    end_time = localtime(data.get('end_time'))
 
-    if start_time <= timezone.now():
+    if start_time <= localtime(now()):
         raise serializers.ValidationError('The start time must be in the future.')
 
     total_duration = service.duration_in_minutes

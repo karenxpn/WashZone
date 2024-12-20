@@ -6,6 +6,8 @@ from orders.order_models.time_slot import TimeSlot
 from orders.serializers.create.create_order_feature_serializer import CreateOrderFeatureSerializer
 from orders.serializers.validate_time_slot import validate_time_slot
 from services.service_models.feature import ServiceFeature
+from django.utils.timezone import localtime
+
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -40,8 +42,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         features_data = validated_data.pop('features', [])
         service = validated_data.get('service')
-        start_time = validated_data.pop('start_time')
-        end_time = validated_data.pop('end_time')
+        start_time = localtime(validated_data.pop('start_time'))
+        end_time = localtime(validated_data.pop('end_time'))
 
         try:
             with transaction.atomic():
