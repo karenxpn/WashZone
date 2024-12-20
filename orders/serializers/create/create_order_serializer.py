@@ -1,3 +1,4 @@
+from django.db import transaction, IntegrityError
 from rest_framework import serializers
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
@@ -42,47 +43,53 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         start_time = validated_data.pop('start_time')
         end_time = validated_data.pop('end_time')
 
-        time_slot = TimeSlot.objects.create(provider=validated_data['provider'], start_time=start_time, end_time=end_time, is_available=False)
+        try:
+            with transaction.atomic():
+                time_slot = TimeSlot.objects.create(provider=validated_data['provider'], start_time=start_time, end_time=end_time, is_available=False)
 
-        order = Order.objects.create(
-            **validated_data,
-            service_name=service.name,
-            service_description=service.description,
-            service_price=service.base_price,
-            service_duration=service.duration_in_minutes,
-            time_slot=time_slot
-        )
-        service = order.service
+                order = Order.objects.create(
+                    **validated_data,
+                    service_name=service.name,
+                    service_description=service.description,
+                    service_price=service.base_price,
+                    service_duration=service.duration_in_minutes,
+                    time_slot=time_slot
+                )
+                service = order.service
 
-        order_features = []
-        for feature_data in features_data:
-            feature = feature_data['feature']
+                order_features = []
+                for feature_data in features_data:
+                    feature = feature_data['feature']
 
-            service_feature = ServiceFeature.objects.get(
-                service=service,
-                feature=feature.id
-            )
+                    service_feature = ServiceFeature.objects.get(
+                        service=service,
+                        feature=feature.id
+                    )
 
-            extra_cost = (
-                service_feature.extra_cost
-                if service_feature and not service_feature.is_included
-                else 0
-            )
+                    extra_cost = (
+                        service_feature.extra_cost
+                        if service_feature and not service_feature.is_included
+                        else 0
+                    )
 
-            extra_duration =(
-                service_feature.extra_time_in_minutes
-                if service_feature and not service_feature.is_included
-                else 0
-            )
+                    extra_duration =(
+                        service_feature.extra_time_in_minutes
+                        if service_feature and not service_feature.is_included
+                        else 0
+                    )
 
-            order_features.append(OrderFeature(order=order,
-                                               feature=feature,
-                                               feature_name=feature.name,
-                                               feature_description=feature.description,
-                                               extra_cost=extra_cost,
-                                               extra_duration=extra_duration))
+                    order_features.append(OrderFeature(order=order,
+                                                       feature=feature,
+                                                       feature_name=feature.name,
+                                                       feature_description=feature.description,
+                                                       extra_cost=extra_cost,
+                                                       extra_duration=extra_duration))
 
-        OrderFeature.objects.bulk_create(order_features)
+                OrderFeature.objects.bulk_create(order_features)
 
-        return order
+                return order
+
+        except IntegrityError:
+            raise serializers.ValidationError("The selected time slot is no longer available. Please choose another.")
+
 
