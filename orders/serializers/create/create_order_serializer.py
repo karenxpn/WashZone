@@ -1,17 +1,25 @@
+from django.db import transaction, IntegrityError
 from rest_framework import serializers
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
+from orders.order_models.time_slot import TimeSlot
 from orders.serializers.create.create_order_feature_serializer import CreateOrderFeatureSerializer
+from orders.serializers.validate_time_slot import validate_time_slot
 from services.service_models.feature import ServiceFeature
+from django.utils.timezone import localtime
+
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.phone_number')
     features = CreateOrderFeatureSerializer(many=True, write_only=True)
+    start_time = serializers.DateTimeField(write_only=True)
+    end_time = serializers.DateTimeField(write_only=True)
+
 
     class Meta:
         model = Order
-        fields = ['owner', 'service', 'provider', 'features', 'order_total', 'order_duration']
+        fields = ['owner', 'service', 'provider', 'features', 'order_total', 'order_duration', 'start_time', 'end_time']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -26,51 +34,64 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         if service.provider != provider:
             raise serializers.ValidationError('The service does not belong to the specified provider.')
 
+        validate_time_slot(provider, service, data)
+
         return data
 
 
     def create(self, validated_data):
         features_data = validated_data.pop('features', [])
         service = validated_data.get('service')
+        start_time = localtime(validated_data.pop('start_time'))
+        end_time = localtime(validated_data.pop('end_time'))
 
-        order = Order.objects.create(
-            **validated_data,
-            service_name=service.name,
-            service_description=service.description,
-            service_price=service.base_price,
-            service_duration=service.duration_in_minutes
-        )
-        service = order.service
+        try:
+            with transaction.atomic():
+                time_slot = TimeSlot.objects.create(provider=validated_data['provider'], start_time=start_time, end_time=end_time, is_available=False)
 
-        order_features = []
-        for feature_data in features_data:
-            feature = feature_data['feature']
+                order = Order.objects.create(
+                    **validated_data,
+                    service_name=service.name,
+                    service_description=service.description,
+                    service_price=service.base_price,
+                    service_duration=service.duration_in_minutes,
+                    time_slot=time_slot
+                )
+                service = order.service
 
-            service_feature = ServiceFeature.objects.filter(
-                service=service,
-                feature=feature.id
-            ).first()
+                order_features = []
+                for feature_data in features_data:
+                    feature = feature_data['feature']
 
-            extra_cost = (
-                service_feature.extra_cost
-                if service_feature and not service_feature.is_included
-                else 0
-            )
+                    service_feature = ServiceFeature.objects.get(
+                        service=service,
+                        feature=feature.id
+                    )
 
-            extra_duration =(
-                service_feature.extra_time_in_minutes
-                if service_feature and not service_feature.is_included
-                else 0
-            )
+                    extra_cost = (
+                        service_feature.extra_cost
+                        if service_feature and not service_feature.is_included
+                        else 0
+                    )
 
-            order_features.append(OrderFeature(order=order,
-                                               feature=feature,
-                                               feature_name=feature.name,
-                                               feature_description=feature.description,
-                                               extra_cost=extra_cost,
-                                               extra_duration=extra_duration))
+                    extra_duration =(
+                        service_feature.extra_time_in_minutes
+                        if service_feature and not service_feature.is_included
+                        else 0
+                    )
 
-        OrderFeature.objects.bulk_create(order_features)
+                    order_features.append(OrderFeature(order=order,
+                                                       feature=feature,
+                                                       feature_name=feature.name,
+                                                       feature_description=feature.description,
+                                                       extra_cost=extra_cost,
+                                                       extra_duration=extra_duration))
 
-        return order
+                OrderFeature.objects.bulk_create(order_features)
+
+                return order
+
+        except IntegrityError:
+            raise serializers.ValidationError("The selected time slot is no longer available. Please choose another.")
+
 

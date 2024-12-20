@@ -1,4 +1,6 @@
 from django.db import models
+
+from orders.order_models.time_slot import TimeSlot
 from services.service_models.feature import Feature
 from services.service_models.provider import Provider
 from services.service_models.service import Service
@@ -19,9 +21,12 @@ class Order(models.Model):
 
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE, related_name="orders")
     features = models.ManyToManyField(Feature, through='OrderFeature', blank=True)
+    time_slot = models.OneToOneField(TimeSlot, on_delete=models.CASCADE,related_name='order', null=True, blank=True)
+
 
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Pending'),
+        ('time_confirmation', 'Time Confirmation'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled'),
@@ -40,6 +45,14 @@ class Order(models.Model):
     def order_duration(self):
         features_duration = sum(feature.extra_duration for feature in self.order_features.all())
         return self.service_duration + features_duration
+
+    def reserve(self):
+        if self.time_slot.is_available_for_duration(self.order_duration):
+            self.time_slot.reserve_slot()
+            self.status = 'time_confirmation'
+            self.save()
+            return True
+        return False
 
     def __str__(self):
         return f'Reservation {self.id} by {self.owner.username}'
