@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from orders.order_models.order import Order
 from orders.order_models.order_feature import OrderFeature
+from orders.order_models.time_slot import TimeSlot
 from orders.serializers.create.create_order_feature_serializer import CreateOrderFeatureSerializer
 from orders.serializers.validate_time_slot import validate_time_slot
 from services.service_models.feature import ServiceFeature
@@ -41,12 +42,15 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         start_time = validated_data.pop('start_time')
         end_time = validated_data.pop('end_time')
 
+        time_slot = TimeSlot.objects.create(provider=validated_data['provider'], start_time=start_time, end_time=end_time, is_available=False)
+
         order = Order.objects.create(
             **validated_data,
             service_name=service.name,
             service_description=service.description,
             service_price=service.base_price,
-            service_duration=service.duration_in_minutes
+            service_duration=service.duration_in_minutes,
+            time_slot=time_slot
         )
         service = order.service
 

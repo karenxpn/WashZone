@@ -5,6 +5,14 @@ from services.service_models.provider import Provider
 
 
 class TimeSlot(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE, related_name='time_slots')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()

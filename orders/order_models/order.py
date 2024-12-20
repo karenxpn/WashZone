@@ -21,7 +21,7 @@ class Order(models.Model):
 
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE, related_name="orders")
     features = models.ManyToManyField(Feature, through='OrderFeature', blank=True)
-    time_slot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE, null=True, blank=True)
+    time_slot = models.OneToOneField(TimeSlot, on_delete=models.CASCADE,related_name='order', null=True, blank=True)
 
 
     status = models.CharField(max_length=20, choices=[
