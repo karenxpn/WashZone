@@ -9,7 +9,7 @@ from .seed_user import create_user
 
 class Command(BaseCommand):
     help = "Seed the database with initial data."
-
+    # call  python manage.py seed_db
 
 
     def handle(self, *args, **options):
