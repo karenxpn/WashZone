@@ -1,7 +1,5 @@
 import random
 import os
-
-from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,10 +7,10 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from .decorators import validate_request
 
-from authentication.models import PhoneOTP
 from user.models import User
 from twilio.rest import Client
 
+from .otp_redis import store_otp, retrieve_otp, delete_otp
 from .serializers.send_otp_body_serializer import SendOtpBodySerializer
 from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
 
@@ -37,14 +35,7 @@ class SendOTPView(APIView):
 
 
         otp = str(random.randint(100000, 999999))
-
-        _, _ = PhoneOTP.objects.update_or_create(
-            user=user,
-            defaults={
-                'otp': otp,
-                'created_at': now()
-            }
-        )
+        store_otp(phone_number, otp)
 
         # Send the OTP using Twilio
         account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
@@ -76,14 +67,14 @@ class VerifyOTPView(APIView):
 
         try:
             user = User.objects.get(phone_number=phone_number)
-            otp_entry = user.otp
 
-            if otp_entry.is_expired():
-                return Response({"error": "OTP has expired"}, status=status.HTTP_400_BAD_REQUEST)
-            if otp_entry.otp == otp:
+            stored_otp = retrieve_otp(phone_number)
+            if not stored_otp:
+                return Response({"error": "OTP expired or does not exist"}, status=400)
+
+            if stored_otp.decode() == otp:
                 user.is_phone_verified = True
                 user.save()
-                otp_entry.delete()
 
                 try:
                     for token in RefreshToken.objects.filter(user=user):
@@ -92,6 +83,8 @@ class VerifyOTPView(APIView):
                     pass  # Log the error if needed
 
                 refresh = RefreshToken.for_user(user)
+
+                delete_otp(phone_number)
                 return Response({
                     "message": "OTP verified successfully",
                     "access": str(refresh.access_token),
@@ -102,8 +95,6 @@ class VerifyOTPView(APIView):
 
         except User.DoesNotExist:
             return Response({"error": "Phone number not found"}, status=status.HTTP_404_NOT_FOUND)
-        except PhoneOTP.DoesNotExist:
-            return Response({"error": "No OTP found for this user"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response(
                 {"error": f"An unexpected error occurred: {str(e)}"},
