@@ -14,27 +14,30 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # create user
-        # create_user(phone_number='+37433988988')
-        # provider1 = create_provider(1, 1,
-        #                             'Detroit Detailing',
-        #                             'ДЕТЕЙЛИНГ | ОКЛЕЙКА | ЗАЩИТНЫЕ ПОКРЫТИЯ | ХИМЧИСТКА | ЕРЕВАН\nПрофессиональный детейлинг центр в Армении🇦🇲\n🔺Автомойка | Химчистка | Полировка\n🔺Оклейка PPF и винила | Тонировка\n🔺Защитные покрытия | 📞 077 087771',
-        #                             '3rd backstreet, Masis St, Yerevan 0061',
-        #                             '077 066019',
-        #                             Point())
-        #
-        # provider2 = create_provider(1, 1,
-        #                             'Carlife Detailing',
-        #                             'Детейлинг полировка кузова.\nКерамика кузова.\nОригинальные пленки (Hexis Bodyfence)',
-        #                             'Armenia Yerevan Admiral-Isakov 140',
-        #                             '099 222264',
-        #                             Point())
+        create_user(phone_number='+37493936313')
+        create_user(phone_number='+37433988988')
 
-        # provider3 = create_provider(1, 1,
-        #                             'EG detailing center',
-        #                             'Մեքենան ևս խնամքի կարիք ունի',
-        #                             'Amiryan 4/6, Yerevan, Armenia',
-        #                             '+374-99-878008',
-        #                             Point(float(44.510154), float(40.179543)))
+        #create provider
+        provider1 = create_provider(1, 1,
+                                    'Detroit Detailing',
+                                    'ДЕТЕЙЛИНГ | ОКЛЕЙКА | ЗАЩИТНЫЕ ПОКРЫТИЯ | ХИМЧИСТКА | ЕРЕВАН\nПрофессиональный детейлинг центр в Армении🇦🇲\n🔺Автомойка | Химчистка | Полировка\n🔺Оклейка PPF и винила | Тонировка\n🔺Защитные покрытия | 📞 077 087771',
+                                    '3rd backstreet, Masis St, Yerevan 0061',
+                                    '077 066019',
+                                    Point())
+
+        provider2 = create_provider(1, 1,
+                                    'Carlife Detailing',
+                                    'Детейлинг полировка кузова.\nКерамика кузова.\nОригинальные пленки (Hexis Bodyfence)',
+                                    'Armenia Yerevan Admiral-Isakov 140',
+                                    '099 222264',
+                                    Point())
+
+        provider3 = create_provider(1, 1,
+                                    'EG detailing center',
+                                    'Մեքենան ևս խնամքի կարիք ունի',
+                                    'Amiryan 4/6, Yerevan, Armenia',
+                                    '+374-99-878008',
+                                    Point(float(44.510154), float(40.179543)))
 
         # create services
         service1 = create_service(provider1, 1,
@@ -56,7 +59,7 @@ class Command(BaseCommand):
                                   10000,
                                   40)
 
-        service4 = create_service(provder2, 1,
+        service4 = create_service(provider2, 1,
                                   'Detailing Carwash',
                                   '',
                                   17000,
@@ -68,7 +71,7 @@ class Command(BaseCommand):
                                   8000,
                                   40)
 
-        service4 = create_service(provder3, 1,
+        service4 = create_service(provider3, 1,
                                   'Detailing Carwash',
                                   '',
                                   15000,
@@ -93,5 +96,20 @@ class Command(BaseCommand):
                                   1000)
 
 
+
+        ServiceFeature.objects.create(owner_id=1,
+                                      service=service1,
+                                      feature=feature1,
+                                      is_included=True)
+
+        ServiceFeature.objects.create(owner_id=1,
+                                      service=service1,
+                                      feature=feature2,
+                                      is_included=True)
+
+        ServiceFeature.objects.create(owner_id=1,
+                                      service=service1,
+                                      feature=feature3,
+                                      is_included=True)
 
         self.stdout.write(self.style.SUCCESS("Database seeded successfully!"))
