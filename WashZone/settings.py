@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'twilio',
     'silk',
     'rest_framework_simplejwt.token_blacklist',
+    'commands',
 ]
 
 MIDDLEWARE = [
