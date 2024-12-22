@@ -1,7 +1,5 @@
 import random
 import os
-
-from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,7 +7,6 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from .decorators import validate_request
 
-from authentication.models import PhoneOTP
 from user.models import User
 from twilio.rest import Client
 
