@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+from .slot_view import SlotView
 from .views import OrderViewSet
 
 
@@ -8,4 +10,5 @@ router.register(r'orders', OrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('slots', SlotView.as_view()),
 ]
