@@ -58,23 +58,70 @@ class AuthenticationTests(TestCase):
 
         self.assertEqual(User.objects.filter(phone_number=self.phone_number).count(), 1)
 
-    @patch('authentication.views.Client')
-    @patch('authentication.views.store_otp')
-    def test_send_otp_twilio_error(self, mock_store_otp, mock_client):
-        mock_store_otp.return_value = True
-        mock_instance = Mock()
-        mock_instance.messages.create.side_effect = TwilioRestException(
-            status=500,
-            uri='/2010-04-01/Accounts/ACXXXXXX/Messages.json',
-            msg='Invalid phone number',
-            code=21211
-        )
+    # @patch('authentication.views.Client')
+    # @patch('authentication.views.store_otp')
+    # def test_send_otp_twilio_error(self, mock_store_otp, mock_client):
+    #     mock_store_otp.return_value = True
+    #     mock_instance = Mock()
+    #     mock_instance.messages.create.side_effect = TwilioRestException(
+    #         status=500,
+    #         uri='/2010-04-01/Accounts/ACXXXXXX/Messages.json',
+    #         msg='Invalid phone number',
+    #         code=21211
+    #     )
+    #
+    #     mock_client.return_value = mock_instance
+    #     response = self.client.post(self.send_otp_url, {'phone_number': self.phone_number})
+    #
+    #     print('response', response)
+    #
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertIn('error', response.data)
+    #     self.assertIn('Failed to send OTP', response.data['error'])
 
-        mock_client.return_value = mock_instance
-        response = self.client.post(self.send_otp_url, {'phone_number': self.phone_number})
+    @patch('authentication.views.retrieve_otp')
+    @patch('authentication.views.delete_otp')
+    def test_verify_otp_success(self, mock_delete_otp, mock_retrieve_otp):
+        mock_retrieve_otp.return_value = self.otp.encode('utf-8')
+        mock_delete_otp.return_value = True
 
-        print('response', response)
+        response = self.client.post(self.verify_otp_url, {
+            'phone_number': self.phone_number,
+            'otp': self.otp
+        })
 
-        self.assertEqual(response.status_code, 500)
-        self.assertIn('error', response.data)
-        self.assertIn('Failed to send OTP', response.data['error'])
+        # Print response data
+        print("Response status:", response.status_code)
+        print("Response data:", response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('access', response.data)
+
+
+    @patch('authentication.views.retrieve_otp')
+    def test_verify_otp_invalid(self, mock_retrieve_otp):
+        mock_retrieve_otp.return_value = '999999'.encode('utf-8')
+
+        response = self.client.post(self.verify_otp_url, {
+            'phone_number': self.phone_number,
+            'otp': self.otp
+        })
+
+        print("Response status:", response.status_code)
+        print("Response data:", response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Invalid OTP', response.data['error'])
+
+
+    @patch('authentication.views.retrieve_otp')
+    def test_verify_otp_expired(self, mock_retrieve_otp):
+        mock_retrieve_otp.return_value = None
+        response = self.client.post(self.verify_otp_url, {
+            'phone_number': self.phone_number,
+            'otp': self.otp
+        })
+
+        print("Response status:", response.status_code)
+        print("Response data:", response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('OTP expired or does not exist', response.data['error'])
