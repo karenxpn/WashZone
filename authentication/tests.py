@@ -3,11 +3,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest.mock import patch, MagicMock, Mock
-
 from twilio.base.exceptions import TwilioRestException
-
 from user.models import User
-from .otp_redis import store_otp
 
 
 # Create your tests here.
