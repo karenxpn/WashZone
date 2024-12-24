@@ -59,3 +59,12 @@ class AuthenticationTests(TestCase):
         self.assertEqual(User.objects.filter(phone_number=self.phone_number).count(), 1)
 
 
+    @patch('authentication.views.Client')
+    @patch('authentication.otp_redis.store_otp')
+    def test_send_otp_invalid_phone_number(self, mock_store_otp, mock_twilio_client):
+        mock_store_otp.return_value = True
+        mock_twilio_client.return_value = MagicMock()
+
+        response = self.client.post(self.send_otp_url, {'phone_number': '+1'})
+        self.assertEqual(response.status_code, 400)
+
