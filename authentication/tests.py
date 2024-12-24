@@ -58,13 +58,23 @@ class AuthenticationTests(TestCase):
 
         self.assertEqual(User.objects.filter(phone_number=self.phone_number).count(), 1)
 
-
     @patch('authentication.views.Client')
-    @patch('authentication.otp_redis.store_otp')
-    def test_send_otp_invalid_phone_number(self, mock_store_otp, mock_twilio_client):
+    @patch('authentication.views.store_otp')
+    def test_send_otp_twilio_error(self, mock_store_otp, mock_client):
         mock_store_otp.return_value = True
-        mock_twilio_client.return_value = MagicMock()
+        mock_instance = Mock()
+        mock_instance.messages.create.side_effect = TwilioRestException(
+            status=500,
+            uri='/2010-04-01/Accounts/ACXXXXXX/Messages.json',
+            msg='Invalid phone number',
+            code=21211
+        )
 
-        response = self.client.post(self.send_otp_url, {'phone_number': '+1'})
-        self.assertEqual(response.status_code, 400)
+        mock_client.return_value = mock_instance
+        response = self.client.post(self.send_otp_url, {'phone_number': self.phone_number})
 
+        print('response', response)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn('error', response.data)
+        self.assertIn('Failed to send OTP', response.data['error'])
