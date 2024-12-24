@@ -8,7 +8,7 @@ from user.models import User
 
 
 # Create your tests here.
-class AuthenticationTests(TestCase):
+class AuthenticationTests(APITestCase):
     def setUp(self):
         self.phone_number = '+37493936313'
         self.otp = '123456'
