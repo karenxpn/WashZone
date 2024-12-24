@@ -125,3 +125,20 @@ class AuthenticationTests(TestCase):
         print("Response data:", response.data)
         self.assertEqual(response.status_code, 400)
         self.assertIn('OTP expired or does not exist', response.data['error'])
+
+
+    @patch('authentication.views.retrieve_otp')
+    def test_verify_otp_redis_error(self, mock_retrieve_otp):
+        # Simulate Redis error
+        mock_retrieve_otp.side_effect = Exception('Redis connection error')
+
+        response = self.client.post(
+            self.verify_otp_url,
+            {
+                'phone_number': self.phone_number,
+                'otp': self.otp
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertIn('An unexpected error occurred', response.data['error'])
