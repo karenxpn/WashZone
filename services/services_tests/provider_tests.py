@@ -96,3 +96,18 @@ class ProviderViewSetTests(APITestCase):
         response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+
+    #delete provider tests
+    def test_delete_provider_not_authenticated(self):
+        response = self.api_client.delete(reverse('provider-detail', kwargs={'pk': self.provider.pk}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_provider_authenticated_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.delete(reverse('provider-detail', kwargs={'pk': self.provider.pk}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_provider_authenticated_owner(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.delete(reverse('provider-detail', kwargs={'pk': self.provider.pk}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

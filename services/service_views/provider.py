@@ -57,6 +57,9 @@ class ProviderViewSet(viewsets.ModelViewSet):
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
+
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
