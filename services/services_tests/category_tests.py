@@ -53,7 +53,7 @@ class CategoryViewSetTests(APITestCase):
     ## update category tests
     def test_update_category_not_authenticated(self):
         payload = {'name': 'test'}
-        response = self.api_client.put(reverse('category-detail', kwargs={'pk': 1}), payload, format='json')
+        response = self.api_client.patch(reverse('category-detail', kwargs={'pk': 1}), payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_category_authenticated_user(self):

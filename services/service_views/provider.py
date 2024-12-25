@@ -48,6 +48,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
 
     @validate_request(ProviderUpdateSerializer)
     def update(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
         return super().update(request, *args, **kwargs)
 
     @validate_request(ProviderUpdateSerializer)

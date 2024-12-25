@@ -12,6 +12,7 @@ class ProviderViewSetTests(APITestCase):
 
     def setUp(self):
         self.user = User.objects.create_user('user')
+        self.user2 = User.objects.create_user('user2')
         self.category = Category.objects.create(name='unique name here')
 
         self.provider = Provider.objects.create(owner=self.user,
@@ -36,12 +37,11 @@ class ProviderViewSetTests(APITestCase):
             "working_hours": []
         }
 
-        self.valid_update_payload = {
-
-        }
+        self.valid_update_payload = {}
 
         self.invalid_update_payload = {
-
+            "latitude": -400.139402,
+            "longitude": -404.5020637,
         }
 
         self.api_client = APIClient()
@@ -73,3 +73,26 @@ class ProviderViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     # update provider tests
+    def test_update_provider_not_authenticated(self):
+        payload = self.valid_update_payload
+        response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_provider_authenticated_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        payload = self.valid_update_payload
+        response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_provider_authenticated_owner(self):
+        self.api_client.force_authenticate(user=self.user)
+        payload = self.valid_update_payload
+        response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_provider_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        payload = self.invalid_update_payload
+        response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
