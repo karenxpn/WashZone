@@ -54,6 +54,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
 
     @validate_request(ProviderUpdateSerializer)
     def partial_update(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
