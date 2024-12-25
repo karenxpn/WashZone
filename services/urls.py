@@ -5,7 +5,7 @@ from .service_views import category, provider, service, feature
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r'categories', category.CategoryViewSet, basename='category')
-router.register(r'providers', provider.ProviderViewSet)
+router.register(r'providers', provider.ProviderViewSet, basename='provider')
 router.register(r'services', service.ServiceViewSet)
 router.register(r'features', feature.FeatureViewSet)
 

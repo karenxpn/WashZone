@@ -1,7 +1,7 @@
 from django.contrib.gis.db.models.functions import Distance
 from django.db import IntegrityError
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, NotAuthenticated
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -32,6 +32,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
         return Provider.objects.all()
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
         serializer.save(owner=self.request.user)
 
     @validate_request(ProviderSerializer)
