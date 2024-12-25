@@ -57,6 +57,15 @@ class ProviderViewSetTests(APITestCase):
         response = self.api_client.get(reverse('provider-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_get_provider_not_authenticated(self):
+        response = self.api_client.get(reverse('provider-detail', kwargs={'pk': self.provider.id}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_provider_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(reverse('provider-detail', kwargs={'pk': self.provider.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     # create provider tests
     def test_create_provider_not_authenticated(self):
         response = self.api_client.post(reverse('provider-list'), data=self.valid_create_payload, format='json')
