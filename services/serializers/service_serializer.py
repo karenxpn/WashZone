@@ -11,6 +11,24 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = '__all__'
 
+class CreateServiceSerializer(serializers.ModelSerializer):
+    features = ServiceFeatureSerializer(many=True, read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.phone_number',)
+
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+
+    def validate(self, data):
+        provider_owner = data.get('provider').owner
+        request = self.context.get('request')
+
+        if provider_owner != request.user:
+            raise serializers.ValidationError('Service provider and owner must match')
+
+        return data
+
 class ServiceListSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.phone_number')
 

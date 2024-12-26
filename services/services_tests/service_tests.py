@@ -15,11 +15,13 @@ class ServiceViewSetTests(APITestCase):
         self.user2 = User.objects.create_user(username='user2')
         self.category = Category.objects.create(name='unique name here')
 
-        self.provider = Provider.objects.create(owner=self.user,
-                                                category=self.category,
-                                                name='test provider',
-                                                address='test address',
-                                                location=Point())
+        self.provider = Provider.objects.create(
+            owner=self.user,
+            category=self.category,
+            name='test provider',
+            address='test address',
+            location=Point()
+        )
 
         self.service = Service.objects.create(
             owner=self.user,
@@ -28,6 +30,15 @@ class ServiceViewSetTests(APITestCase):
             base_price=1000,
             duration_in_minutes=20
         )
+
+        self.valid_create_payload = {
+            'provider': self.provider.id,
+            'name': 'valid service payload name',
+            'base_price': 10000,
+            'duration_in_minutes': 20,
+        }
+
+        self.invalid_create_payload = {}
 
 
         self.api_client = APIClient()
@@ -55,4 +66,22 @@ class ServiceViewSetTests(APITestCase):
 
 
 
+    # create service tests
+    def test_create_service_not_authenticated(self):
+        response = self.api_client.post(reverse('service-list'), data=self.valid_create_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_create_service_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.post(reverse('service-list'), data=self.valid_create_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_service_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.post(reverse('service-list'), data=self.invalid_create_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_service_different_owners(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.post(reverse('service-list'), data=self.valid_create_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
