@@ -41,3 +41,18 @@ class ServiceViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.get(reverse('service-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+    # get one service tests
+    def test_get_service_not_authenticated(self):
+        response = self.api_client.get(reverse('service-detail', kwargs={'pk': self.service.pk}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_service_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(reverse('service-detail', kwargs={'pk': self.service.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+
+
