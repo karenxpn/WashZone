@@ -175,31 +175,56 @@ class ServiceViewSetTests(APITestCase):
 
     # add feature to service tests
     def test_add_feature_not_authenticated(self):
-        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
                                        self.add_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_add_feature_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
-        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
                                        self.add_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_add_feature_invalid_payload(self):
         self.api_client.force_authenticate(user=self.user)
-        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
                                        self.add_feature_invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_add_feature_not_owner(self):
         self.api_client.force_authenticate(user=self.user2)
-        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
                                        self.add_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
+    # remove feature tests
+    def test_remove_feature_not_authenticated(self):
+        response = self.api_client.delete(reverse('service-remove-feature', kwargs={'pk': self.service.pk}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_remove_feature_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
+                             self.add_feature_valid_payload, format='json')
 
+        response = self.api_client.delete(reverse('service-remove-feature', kwargs={'pk': self.service.pk}),
+                                          {'feature_id': self.feature.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_remove_feature_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.delete(reverse('service-remove-feature', kwargs={'pk': self.service.pk}),
+                                          {'feature_id': self.feature.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_remove_feature_invalid_feature_id(self):
+        self.api_client.force_authenticate(user=self.user)
+        self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
+                             self.add_feature_valid_payload, format='json')
+        response = self.api_client.delete(reverse('service-remove-feature', kwargs={'pk': self.service.pk}),
+                                          {'feature_id': 9999}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 
