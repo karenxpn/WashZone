@@ -60,6 +60,12 @@ class ServiceViewSetTests(APITestCase):
         }
 
         self.add_feature_invalid_payload = {}
+        self.update_feature_valid_payload = {
+            'feature_id': self.feature.id,
+            'is_included': True
+        }
+
+        self.update_feature_invalid_payload = {}
 
         self.api_client = APIClient()
 
@@ -227,6 +233,37 @@ class ServiceViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+    # update service feature tests
+    def test_update_feature_not_authenticated(self):
+        response = self.api_client.patch(reverse('service-update-feature', kwargs={'pk': self.service.pk}),
+                                         self.update_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_not_linked_feature_update(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('service-update-feature', kwargs={'pk': self.service.pk}),
+                                       self.update_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND) # not linked
+
+    def test_update_feature_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.service.pk}),
+                             self.add_feature_valid_payload, format='json')
+
+        response = self.api_client.patch(reverse('service-update-feature', kwargs={'pk': self.service.pk}),
+                                       self.update_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_feature_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('service-update-feature', kwargs={'pk': self.service.pk}),
+                                       self.update_feature_invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_feature_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.patch(reverse('service-update-feature', kwargs={'pk': self.service.pk}),
+                                         self.update_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
