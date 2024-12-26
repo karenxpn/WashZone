@@ -133,4 +133,18 @@ class ServiceViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
+    # get provider services tests
+    def test_get_provider_services_not_authenticated(self):
+        response = self.api_client.get(reverse('service-list'), {'provider_id': self.provider.id})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_provider_services_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(reverse('service-list'), {'provider_id': self.provider.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+
+
+
 
