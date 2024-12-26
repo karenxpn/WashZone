@@ -144,6 +144,23 @@ class ServiceViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+    # get additional features tests
+    def test_get_additional_features_not_authenticated(self):
+        response = self.api_client.get(reverse('service-additional-features', kwargs={'pk': self.service.pk}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_additional_features_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(reverse('service-additional-features', kwargs={'pk': self.service.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_additional_features_not_found(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(reverse('service-additional-features', kwargs={'pk': 9999}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+
 
 
 
