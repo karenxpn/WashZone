@@ -40,6 +40,13 @@ class ServiceViewSetTests(APITestCase):
 
         self.invalid_create_payload = {}
 
+        self.valid_update_payload = {
+            'name': 'valid service updated payload name',
+        }
+        self.invalid_update_payload = {
+            'name': ''
+        }
+
 
         self.api_client = APIClient()
 
@@ -85,3 +92,31 @@ class ServiceViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user2)
         response = self.api_client.post(reverse('service-list'), data=self.valid_create_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    # update service tests
+    def test_update_service_not_authenticated(self):
+        response = self.api_client.patch(reverse('service-detail', kwargs={'pk': self.service.pk}), self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_service_different_owners(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.patch(reverse('service-detail', kwargs={'pk': self.service.pk}), self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+    def test_update_service_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('service-detail', kwargs={'pk': self.service.pk}), self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_service_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('service-detail', kwargs={'pk': self.service.pk}),
+                                         self.invalid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
