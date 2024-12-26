@@ -1,3 +1,5 @@
+from http.client import responses
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
@@ -25,6 +27,14 @@ class FeatureViewSetTests(APITestCase):
         }
 
         self.invalid_create_payload = {}
+
+        self.valid_update_payload = {
+            'name': 'Feature 2',
+        }
+
+        self.invalid_update_payload = {
+            'name': '',
+        }
 
         self.api_client = APIClient()
 
@@ -54,3 +64,29 @@ class FeatureViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.post(reverse('feature-list'), data=self.invalid_create_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    # update feature tests
+    def test_update_feature_not_authenticated(self):
+        response = self.api_client.patch(reverse('feature-detail', kwargs={'pk': self.feature.pk}), data=self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_feature_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('feature-detail', kwargs={'pk': self.feature.pk}), data=self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_feature_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('feature-detail', kwargs={'pk': self.feature.pk}), data=self.invalid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_feature_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.patch(reverse('feature-detail', kwargs={'pk': self.feature.pk}),
+                                         data=self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+
+

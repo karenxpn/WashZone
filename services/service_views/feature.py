@@ -1,5 +1,5 @@
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, NotAuthenticated
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -23,6 +23,9 @@ class FeatureViewSet(viewsets.ModelViewSet):
         return Feature.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
+
         serializer.save(owner=self.request.user)
 
     @validate_request(FeatureSerializer)
@@ -31,13 +34,22 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
     @validate_request(FeatureUpdateSerializer)
     def update(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
+
         return super().update(request, *args, **kwargs)
 
     @validate_request(FeatureUpdateSerializer)
     def partial_update(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
+
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated("Authentication credentials were not provided.")
+
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
