@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
 from services.service_models.category import Category
+from services.service_models.feature import Feature
 from services.service_models.provider import Provider
 from services.service_models.service import Service
 from user.models import User
@@ -31,6 +32,13 @@ class ServiceViewSetTests(APITestCase):
             duration_in_minutes=20
         )
 
+        self.feature = Feature.objects.create(
+            owner=self.user,
+            name='Feature 1',
+            description='Feature description',
+            cost=2000
+        )
+
         self.valid_create_payload = {
             'provider': self.provider.id,
             'name': 'valid service payload name',
@@ -47,6 +55,11 @@ class ServiceViewSetTests(APITestCase):
             'name': ''
         }
 
+        self.add_feature_valid_payload = {
+            'feature_id': self.feature.id
+        }
+
+        self.add_feature_invalid_payload = {}
 
         self.api_client = APIClient()
 
@@ -158,6 +171,33 @@ class ServiceViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.get(reverse('service-additional-features', kwargs={'pk': 9999}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    # add feature to service tests
+    def test_add_feature_not_authenticated(self):
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+                                       self.add_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_add_feature_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+                                       self.add_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_add_feature_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+                                       self.add_feature_invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_feature_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.post(reverse('service-add-feature', kwargs={'pk': self.feature.pk}),
+                                       self.add_feature_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
 
 
 
