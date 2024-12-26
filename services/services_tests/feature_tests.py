@@ -88,5 +88,18 @@ class FeatureViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+    # delete feature tests
+    def test_delete_feature_not_authenticated(self):
+        response = self.api_client.delete(reverse('feature-detail', kwargs={'pk': self.feature.pk}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_delete_feature_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.delete(reverse('feature-detail', kwargs={'pk': self.feature.pk}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_feature_owner(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.delete(reverse('feature-detail', kwargs={'pk': self.feature.pk}))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
