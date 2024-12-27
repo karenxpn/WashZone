@@ -74,29 +74,11 @@ class OrderViewSetTests(APITestCase):
             extra_cost=9000
         )
 
-        self.valid_time_slot_payload = {
-            'provider_id': self.provider.id,
-            'start_time': '2024-12-29T13:00:00',
-            'end_time': '2024-12-29T14:00:00',
-        }
-
-        self.valid_create_payload = {
+        self.valid_payload_part = {
             'service': self.service.id,
             'provider': self.provider.id,
             'start_time': '2024-12-29T13:00:00',
             'end_time': '2024-12-29T15:00:00',
-            'features': [
-                {
-                    'feature': self.feature.id
-                }
-            ]
-        }
-
-        self.overlay_working_hour_payload = {
-            'service': self.service.id,
-            'provider': self.provider.id,
-            'start_time': '2024-12-29T16:00:00',
-            'end_time': '2024-12-29T18:00:00',
             'features': [
                 {
                     'feature': self.feature.id
@@ -111,35 +93,24 @@ class OrderViewSetTests(APITestCase):
             is_available=False,
         )
 
-        self.overlay_other_time_slot_payload = {
-            'service': self.service.id,
-            'provider': self.provider.id,
+        self.valid_create_payload = self.valid_payload_part
+
+        self.overlay_working_hour_payload = self.valid_payload_part | {
+            'start_time': '2024-12-29T16:00:00',
+            'end_time': '2024-12-29T18:00:00',
+
+        }
+
+        self.overlay_other_time_slot_payload = self.valid_payload_part | {
             'start_time': '2024-12-29T10:00:00',
             'end_time': '2024-12-29T12:00:00',
-            'features': [
-                {
-                    'feature': self.feature.id
-                }
-            ]
         }
 
-        self.different_owner_provider_and_service_payload = {
+        self.different_owner_provider_and_service_payload = self.valid_payload_part | {
             'service': self.other_service.id,
-            'provider': self.provider.id,
-            'start_time': '2024-12-29T13:00:00',
-            'end_time': '2024-12-29T15:00:00',
-            'features': [
-                {
-                    'feature': self.feature.id
-                }
-            ]
         }
 
-        self.not_valid_feature_payload = {
-            'service': self.other_service.id,
-            'provider': self.provider.id,
-            'start_time': '2024-12-29T13:00:00',
-            'end_time': '2024-12-29T15:00:00',
+        self.not_valid_feature_payload = self.valid_payload_part | {
             'features': [
                 {
                     'feature': 99999
