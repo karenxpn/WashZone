@@ -132,6 +132,12 @@ class OrderViewSetTests(APITestCase):
 
         self.invalid_create_payload = {}
 
+        self.valid_update_payload = {
+            'status': 'approved',
+        }
+
+        self.invalid_update_payload = {}
+
         self.api_client = APIClient()
 
     # get order tests
@@ -196,3 +202,32 @@ class OrderViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.post(reverse('order-list'), data=self.not_valid_feature_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    # update order tests
+    def test_update_order_not_authenticated(self):
+        response = self.api_client.patch(reverse('order-detail', kwargs={'pk': self.order.id}), data=self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_order_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('order-detail', kwargs={'pk': self.order.id}), data=self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_order_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.patch(reverse('order-detail', kwargs={'pk': self.order.id}), data=self.invalid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_order_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.patch(reverse('order-detail', kwargs={'pk': self.order.id}), data=self.valid_update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+
+
