@@ -36,10 +36,10 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'destroy':
-            return [IsOwner()]
+            return [IsAuthenticated(), IsOwner()]
 
         if self.action in ['update', 'partial_update', 'list', 'retrieve']:
-            return [IsOwnerOrProvider()]
+            return [IsAuthenticated(), IsOwnerOrProvider()]
 
         return super().get_permissions()
 
