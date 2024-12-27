@@ -5,6 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
+from orders.order_models.order import Order
 from orders.order_models.time_slot import TimeSlot
 from services.service_models.category import Category
 from services.service_models.feature import Feature, ServiceFeature
@@ -74,6 +75,17 @@ class OrderViewSetTests(APITestCase):
             extra_cost=9000
         )
 
+        self.order = Order.objects.create(
+            owner=self.user,
+            service=self.service,
+            service_name=self.service.name,
+            service_description='Service description',
+            service_price = self.service.base_price,
+            service_duration=self.service.duration_in_minutes,
+            provider=self.provider,
+            status='pending',
+        )
+
         self.valid_payload_part = {
             'service': self.service.id,
             'provider': self.provider.id,
@@ -130,6 +142,16 @@ class OrderViewSetTests(APITestCase):
     def test_get_orders_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.get(reverse('order-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # get one order
+    def test_get_one_order_not_authenticated(self):
+        response = self.api_client.get(reverse('order-detail', kwargs={'pk': self.order.id}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_one_order_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(reverse('order-detail', kwargs={'pk': self.order.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # create order tests
