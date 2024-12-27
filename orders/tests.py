@@ -11,6 +11,8 @@ from services.service_models.provider import Provider, WorkingHour
 from services.service_models.service import Service
 from user.models import User
 
+from orders.slot_tests import SlotViewTests
+
 
 class OrderViewSetTests(APITestCase):
     def setUp(self):

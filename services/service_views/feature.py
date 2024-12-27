@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound, NotAuthenticated
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
@@ -17,7 +17,7 @@ class FeatureViewSet(viewsets.ModelViewSet):
         return FeatureUpdateSerializer if self.action in ['update', 'partial_update'] else FeatureSerializer
 
     def get_permissions(self):
-        return [IsAuthenticated(), IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
+        return [IsAuthenticated(), IsOwner(), IsAdminUser()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
 
     def get_queryset(self):
         return Feature.objects.filter(owner=self.request.user)
