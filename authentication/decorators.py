@@ -6,7 +6,7 @@ def validate_request(serializer_class):
     def decorator(func):
         @wraps(func)
         def wrapper(self, request, *args, **kwargs):
-            serializer = serializer_class(data=request.data)
+            serializer = serializer_class(data=request.data, context={'request': request})
 
             # Check if serializer is valid
             if serializer.is_valid():

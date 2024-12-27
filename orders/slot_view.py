@@ -12,7 +12,7 @@ class SlotView(APIView):
 
     @validate_request(CloseTimeSlotSerializer)
     def post(self, request):
-        serializer = CloseTimeSlotSerializer(data=request.data)
+        serializer = CloseTimeSlotSerializer(data=request.data, context={'request': request})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
