@@ -11,7 +11,7 @@ from user.models import User
 class ProviderViewSetTests(APITestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user('user')
+        self.user = User.objects.create_user('user', is_staff=True)
         self.user2 = User.objects.create_user('user2')
         self.category = Category.objects.create(name='unique name here')
 
@@ -20,6 +20,7 @@ class ProviderViewSetTests(APITestCase):
                                                 name='test provider',
                                                 address='test address',
                                                 location=Point())
+
 
         self.valid_create_payload = {
             'owner': self.user.id,

@@ -12,7 +12,7 @@ from user.models import User
 
 class ServiceViewSetTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='user')
+        self.user = User.objects.create_user(username='user', is_staff=True)
         self.user2 = User.objects.create_user(username='user2')
         self.category = Category.objects.create(name='unique name here')
 
@@ -110,7 +110,7 @@ class ServiceViewSetTests(APITestCase):
     def test_create_service_different_owners(self):
         self.api_client.force_authenticate(user=self.user2)
         response = self.api_client.post(reverse('service-list'), data=self.valid_create_payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
     # update service tests

@@ -8,7 +8,7 @@ from user.models import User
 
 class FeatureViewSetTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='test')
+        self.user = User.objects.create_user(username='test', is_staff=True)
         self.user2 = User.objects.create_user(username='test2')
 
         self.feature = Feature.objects.create(
@@ -83,7 +83,7 @@ class FeatureViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user2)
         response = self.api_client.patch(reverse('feature-detail', kwargs={'pk': self.feature.pk}),
                                          data=self.valid_update_payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
     # delete feature tests
@@ -94,7 +94,7 @@ class FeatureViewSetTests(APITestCase):
     def test_delete_feature_not_owner(self):
         self.api_client.force_authenticate(user=self.user2)
         response = self.api_client.delete(reverse('feature-detail', kwargs={'pk': self.feature.pk}))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_feature_owner(self):
         self.api_client.force_authenticate(user=self.user)
