@@ -225,6 +225,20 @@ class OrderViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+    # delete order tests
+    def test_delete_order_not_authenticated(self):
+        response = self.api_client.delete(reverse('order-detail', kwargs={'pk': self.order.id}))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_order_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.delete(reverse('order-detail', kwargs={'pk': self.order.id}))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_order_not_owner(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.delete(reverse('order-detail', kwargs={'pk': self.order.id}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 
