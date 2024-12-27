@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.contrib.gis.geos import Point
 from django.urls import reverse
 from rest_framework import status
@@ -110,7 +108,6 @@ class OrderViewSetTests(APITestCase):
         self.overlay_working_hour_payload = self.valid_payload_part | {
             'start_time': '2024-12-29T16:00:00',
             'end_time': '2024-12-29T18:00:00',
-
         }
 
         self.overlay_other_time_slot_payload = self.valid_payload_part | {
@@ -130,12 +127,11 @@ class OrderViewSetTests(APITestCase):
             ]
         }
 
-        self.invalid_create_payload = {}
-
         self.valid_update_payload = {
             'status': 'approved',
         }
 
+        self.invalid_create_payload = {}
         self.invalid_update_payload = {}
 
         self.api_client = APIClient()
