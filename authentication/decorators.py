@@ -1,4 +1,4 @@
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import APIException
 from functools import wraps
 
 
@@ -7,24 +7,14 @@ def validate_request(serializer_class):
         @wraps(func)
         def wrapper(self, request, *args, **kwargs):
             serializer = serializer_class(data=request.data, context={'request': request})
-
-            # Check if serializer is valid
             if serializer.is_valid():
-                # Pass validated data to the view function
                 request.validated_data = serializer.validated_data
                 return func(self, request, *args, **kwargs)
 
-            # Collect and format error messages
-            errors = serializer.errors
-            formatted_errors = []
-
-            for field, messages in errors.items():
-                # Format the error message string
-                for message in messages:
-                    formatted_errors.append(f"{field}: {message}")
-
-            # raise the formatted error response
-            raise ValidationError({"message": "\n".join(formatted_errors)})
+            # Get first error message
+            first_field = next(iter(serializer.errors))
+            first_message = serializer.errors[first_field][0]
+            raise APIException(detail={'message': f"{first_field}: {first_message}"})
 
         return wrapper
 
