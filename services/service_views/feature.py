@@ -17,15 +17,12 @@ class FeatureViewSet(viewsets.ModelViewSet):
         return FeatureUpdateSerializer if self.action in ['update', 'partial_update'] else FeatureSerializer
 
     def get_permissions(self):
-        return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
+        return [IsAuthenticated(), IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
 
     def get_queryset(self):
         return Feature.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
-
         serializer.save(owner=self.request.user)
 
     @validate_request(FeatureSerializer)
@@ -34,22 +31,13 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
     @validate_request(FeatureUpdateSerializer)
     def update(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
-
         return super().update(request, *args, **kwargs)
 
     @validate_request(FeatureUpdateSerializer)
     def partial_update(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
-
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
-
         try:
             instance = self.get_object()
             self.perform_destroy(instance)

@@ -30,7 +30,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return ServiceUpdateSerializer if self.action in ['update', 'partial_update'] else ServiceSerializer
 
     def get_permissions(self):
-        return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
+        return [IsAuthenticated(), IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
 
 
     def get_queryset(self):
@@ -48,9 +48,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
-
         serializer.save(owner=self.request.user)
 
     @action(detail=True, methods=['get'], url_path='additional-features')
@@ -82,20 +79,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
 
     @validate_request(ServiceUpdateSerializer)
     def update(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
         return super().update(request, *args, **kwargs)
 
     @validate_request(ServiceUpdateSerializer)
     def partial_update(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            raise NotAuthenticated("Authentication credentials were not provided.")
-
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
