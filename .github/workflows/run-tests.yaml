@@ -1,5 +1,6 @@
 name: Run Django Tests with Redis
 
+
 on:
   push:
     branches:
@@ -62,6 +63,9 @@ jobs:
         echo "DEBUG=True" >> $GITHUB_ENV
         echo "DATABASE_URL=postgres://django:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db" >> $GITHUB_ENV
         echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+
+    - name: Debug Environment Variables
+      run: env | grep JWT
 
     # Step 5: Run Django tests
     - name: Run tests
