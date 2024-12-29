@@ -86,47 +86,7 @@ jobs:
       run: |
         python -m pip install tblib
 
-    - name: Verify Redis Connection
-      run: |
-        echo "Verifying Redis connection..."
-        for i in {1..30}; do
-          if redis-cli ping > /dev/null 2>&1; then
-            echo "Redis is available!"
-            exit 0
-          fi
-          echo "Waiting for Redis... (attempt $i/30)"
-          sleep 1
-        done
-        echo "Redis failed to become available"
-        exit 1
-
-    - name: Debug environment variables and secrets
-      run: |
-        echo "Checking if SECRET_KEY is set..."
-        if [ -z "$DJANGO_SECRET_KEY" ]; then
-          echo "SECRET_KEY is empty or not set!"
-        else
-          echo "SECRET_KEY is set (length: ${#DJANGO_SECRET_KEY} characters)"
-        fi
-        
-        echo "Checking other environment variables..."
-        echo "DJANGO_SETTINGS_MODULE: $DJANGO_SETTINGS_MODULE"
-        echo "DEBUG: $DEBUG"
-        echo "DATABASE_URL exists: $([ ! -z "$DATABASE_URL" ] && echo 'Yes' || echo 'No')"
-        echo "REDIS_URL exists: $([ ! -z "$REDIS_URL" ] && echo 'Yes' || echo 'No')"
-
     - name: Run migrations and tests
       run: |
         python manage.py migrate
         python manage.py test --parallel auto
-      env:
-        DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-        DEBUG: 'True'
-        DB_NAME: test_db
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_HOST: localhost
-        JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
-        JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
-        DJANGO_SETTINGS_MODULE: WashZone.settings
-        PYTHONUNBUFFERED: 1
