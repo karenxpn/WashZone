@@ -12,9 +12,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
+      DJANGO_SETTING_MODULE: WashZone.settings
       SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       DEBUG: true
-      DATABASE_URL: postgres://django:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db
+      DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db
       REDIS_URL: redis://localhost:6379
       JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
       JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
@@ -68,18 +69,20 @@ jobs:
         echo "DEBUG: Environment Variables"
         env | grep -E "SECRET_KEY|DATABASE_URL|REDIS_URL|JWT"
 
-    - name: Wait for services
+    - name: Wait for Redis
       run: |
-        echo "Waiting for PostgreSQL..."
-        while ! pg_isready -h localhost -p 5432; do
+        echo "Checking Redis connection..."
+        until redis-cli ping; do
+          echo "Redis is unavailable - sleeping"
           sleep 1
         done
-        echo "Waiting for Redis..."
-        while ! redis-cli -h localhost ping; do
-          sleep 1
-        done
+        echo "Redis is up and running!"
 
-    - name: Run tests
+    - name: Run migrations and tests
       run: |
+        python manage.py check --deploy
+        python manage.py makemigrations --check
         python manage.py migrate
-        python manage.py test
+        python manage.py test --parallel auto
+      env:
+        PYTHONUNBUFFERED: 1
