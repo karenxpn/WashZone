@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.contrib.gis.geos import Point
 from django.urls import reverse
 from rest_framework import status
@@ -33,7 +35,7 @@ class OrderViewSetTests(APITestCase):
                 provider=self.provider,
                 weekday=i,
                 opening_time="09:00:00",
-                closing_time="17:00:00",
+                closing_time="19:00:00",
             )
 
         self.service = Service.objects.create(
@@ -89,14 +91,16 @@ class OrderViewSetTests(APITestCase):
         self.valid_payload_part = {
             'service': self.service.id,
             'provider': self.provider.id,
-            'start_time': '2024-12-29T13:00:00',
-            'end_time': '2024-12-29T15:00:00',
+            'start_time': (datetime.now() + timedelta(hours=1)).replace(microsecond=0),
+            'end_time': (datetime.now() + timedelta(hours=3)).replace(microsecond=0),
             'features': [
                 {
                     'feature': self.feature.id
                 }
             ]
         }
+
+        print(self.valid_payload_part['start_time'], self.valid_payload_part['end_time'])
 
         TimeSlot.objects.create(
             provider=self.provider,
@@ -108,13 +112,13 @@ class OrderViewSetTests(APITestCase):
         self.valid_create_payload = self.valid_payload_part
 
         self.overlay_working_hour_payload = self.valid_payload_part | {
-            'start_time': '2024-12-29T16:00:00',
-            'end_time': '2024-12-29T18:00:00',
+            'start_time': (datetime.now() + timedelta(days=1)).replace(hour=18, minute=0, second=0, microsecond=0),
+            'end_time': (datetime.now() + timedelta(days=1)).replace(hour=20, minute=0, second=0, microsecond=0)
         }
 
         self.overlay_other_time_slot_payload = self.valid_payload_part | {
-            'start_time': '2024-12-29T10:00:00',
-            'end_time': '2024-12-29T12:00:00',
+            'start_time': (datetime.now() + timedelta(hours=2)).replace(microsecond=0),
+            'end_time': (datetime.now() + timedelta(hours=4)).replace(microsecond=0),
         }
 
         self.different_owner_provider_and_service_payload = self.valid_payload_part | {
@@ -174,6 +178,7 @@ class OrderViewSetTests(APITestCase):
     def test_create_order_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.post(reverse('order-list'), data=self.valid_create_payload, format='json')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_order_invalid_data(self):
