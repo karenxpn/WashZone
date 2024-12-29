@@ -66,8 +66,15 @@ jobs:
         echo "JWT_ACCESS_TOKEN_LIFETIME=${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}" >> $GITHUB_ENV
         echo "JWT_REFRESH_TOKEN_LIFETIME=${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}" >> $GITHUB_ENV
 
+    - name: Debug SECRET_KEY
+      run:
+        echo "SECRET_KEY is set to: $SECRET_KEY"
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     - name: Debug Environment Variables
       run: env | grep JWT
+
 
     # Step 5: Run Django tests
     - name: Run tests
