@@ -1,25 +1,18 @@
-name: Run Django Tests with Redis
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   test:
     runs-on: ubuntu-latest
 
     env:
-      SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       DEBUG: 'True'
-      DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db
-      REDIS_URL: redis://localhost:6379
+      DB_NAME: test_db
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: localhost
       JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
       JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
       DJANGO_SETTINGS_MODULE: WashZone.settings
+      PYTHONUNBUFFERED: 1
 
     services:
       postgres:
@@ -85,10 +78,10 @@ jobs:
     - name: Debug environment variables and secrets
       run: |
         echo "Checking if SECRET_KEY is set..."
-        if [ -z "$SECRET_KEY" ]; then
+        if [ -z "$DJANGO_SECRET_KEY" ]; then
           echo "SECRET_KEY is empty or not set!"
         else
-          echo "SECRET_KEY is set (length: ${#SECRET_KEY} characters)"
+          echo "SECRET_KEY is set (length: ${#DJANGO_SECRET_KEY} characters)"
         fi
         
         echo "Checking other environment variables..."
@@ -102,10 +95,13 @@ jobs:
         python manage.py migrate
         python manage.py test --parallel auto
       env:
-        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         DEBUG: 'True'
-        DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db
-        REDIS_URL: redis://localhost:6379
+        DB_NAME: test_db
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: localhost
         JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
         JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
+        DJANGO_SETTINGS_MODULE: WashZone.settings
         PYTHONUNBUFFERED: 1
