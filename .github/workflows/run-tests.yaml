@@ -16,8 +16,8 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
           POSTGRES_DB: test_db
         ports:
           - 5432:5432
@@ -58,17 +58,17 @@ jobs:
 
     - name: Set environment variables
       run: |
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_ENV
+        echo "SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> $GITHUB_ENV
         echo "DEBUG=True" >> $GITHUB_ENV
-        echo "DATABASE_URL=postgres://django:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/test_db" >> $GITHUB_ENV
+        echo "DATABASE_URL=postgres://django:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db" >> $GITHUB_ENV
         echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
 
     # Step 5: Run Django tests
     - name: Run tests
       env:
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         DEBUG: true
-        DATABASE_URL: postgres://django:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/test_db
+        DATABASE_URL: postgres://django:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db
         REDIS_URL: redis://localhost:6379
       run: |
         python manage.py migrate
