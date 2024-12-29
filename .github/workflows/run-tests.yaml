@@ -19,6 +19,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
       JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
+      DJANGO_SETTINGS_MODULE: WashZone.settings
 
     services:
       postgres:
@@ -101,4 +102,10 @@ jobs:
         python manage.py migrate
         python manage.py test --parallel auto
       env:
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        DEBUG: 'True'
+        DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db
+        REDIS_URL: redis://localhost:6379
+        JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
+        JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
         PYTHONUNBUFFERED: 1
