@@ -35,7 +35,7 @@ def validate_request(serializer_class):
             if not isinstance(first_message, str):
                 first_message = str(first_message)
 
-            raise ValidationError({'message': f"{first_field}: {first_message}"})
+            raise ValidationError({'message': f"{first_field + ': ' if first_field != 'non_field_errors' else '' }{first_message}"})
 
         return wrapper
 
