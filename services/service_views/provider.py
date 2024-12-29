@@ -1,8 +1,8 @@
 from django.contrib.gis.db.models.functions import Distance
 from django.db import IntegrityError
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound, NotAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
@@ -23,7 +23,7 @@ class ProviderViewSet(viewsets.ModelViewSet):
         return ProviderUpdateSerializer if self.action in ['update', 'partial_update'] else ProviderSerializer
 
     def get_permissions(self):
-        return [IsOwner()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
+        return [IsAuthenticated(), IsOwner(), IsAdminUser()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
 
     def get_queryset(self):
         user = self.request.user

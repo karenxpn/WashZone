@@ -2,13 +2,14 @@ from django.db.models import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
 from services.serializers.service_feature_serializer import ServiceFeatureSerializer
-from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer, ServiceListSerializer
+from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer, ServiceListSerializer, \
+    CreateServiceSerializer
 from services.service_models.feature import ServiceFeature
 from services.service_models.service import Service
 from services.service_views.add_feature_to_service import add_feature_to_service
@@ -23,10 +24,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return ServiceListSerializer
+        if self.action == 'create':
+            return CreateServiceSerializer
+
         return ServiceUpdateSerializer if self.action in ['update', 'partial_update'] else ServiceSerializer
 
     def get_permissions(self):
-        return [IsOwner()] if self.action in ['update', 'partial_update', 'destroy'] else super().get_permissions()
+        return [IsAuthenticated(), IsOwner(), IsAdminUser()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else super().get_permissions()
 
 
     def get_queryset(self):

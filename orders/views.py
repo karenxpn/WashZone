@@ -1,7 +1,6 @@
-from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from WashZone.permissions import IsOwnerOrProvider, IsOwner
@@ -36,10 +35,10 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'destroy':
-            return [IsOwner()]
+            return [IsAuthenticated(), IsOwner()]
 
         if self.action in ['update', 'partial_update', 'list', 'retrieve']:
-            return [IsOwnerOrProvider()]
+            return [IsAuthenticated(), IsOwnerOrProvider()]
 
         return super().get_permissions()
 

@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
+from twilio.base.exceptions import TwilioRestException
+
 from .decorators import validate_request
 
 from user.models import User
@@ -19,9 +21,7 @@ from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
 class SendOTPView(APIView):
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
-        print(request.data)
         validated_data = request.validated_data
-        print(validated_data)
         phone_number = validated_data['phone_number']
 
         try:
@@ -50,7 +50,8 @@ class SendOTPView(APIView):
             # )
 
             return Response({'otp': otp}, status=status.HTTP_200_OK)
-
+        except TwilioRestException as e:
+            return Response({'error': f'Failed to send OTP: {str(e)}'}, status=500)
         except Exception as e:
             return Response(
                 {"error": f"Failed to send OTP: {str(e)}"},
