@@ -63,6 +63,8 @@ jobs:
         echo "DEBUG=True" >> $GITHUB_ENV
         echo "DATABASE_URL=postgres://django:${{ secrets.DB_PASSWORD }}@localhost:5432/test_db" >> $GITHUB_ENV
         echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+        echo "JWT_ACCESS_TOKEN_LIFETIME=${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}" >> $GITHUB_ENV
+        echo "JWT_REFRESH_TOKEN_LIFETIME=${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}" >> $GITHUB_ENV
 
     - name: Debug Environment Variables
       run: env | grep JWT
