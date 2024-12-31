@@ -13,7 +13,7 @@ class SlotViewTests(APITestCase):
 
         self.url = reverse('slot')
 
-        self.user = User.objects.create_user(username='user')
+        self.user = User.objects.create_user(username='user', is_staff=True)
         self.user2 = User.objects.create_user(username='user2')
         self.category = Category.objects.create(name='unique name here')
 
@@ -54,3 +54,13 @@ class SlotViewTests(APITestCase):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.post(self.url, self.invalid_create_slot_payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # get time slots tests
+    def test_get_timeslots_not_authenticated(self):
+        response = self.api_client.get(self.url, {'date': '2024-12-21', 'provider': self.provider.id})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_timeslots_authenticated(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.get(self.url, {'date': '2024-12-21', 'provider': self.provider.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
