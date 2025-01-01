@@ -14,23 +14,16 @@ from user.models import User
 from twilio.rest import Client
 
 from .otp_redis import store_otp, retrieve_otp, delete_otp
+from .schemas import send_otp_schema, verify_otp_schema
 from .serializers.send_otp_body_serializer import SendOtpBodySerializer
 from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
-from drf_spectacular.utils import extend_schema
 
 
 
 # Create your views here.
 class SendOTPView(APIView):
-    @extend_schema(
-        summary="Send OTP",
-        description="Sends a One-Time Password (OTP) to the provided phone number. If the user does not exist, it creates a new user.",
-        request=SendOtpBodySerializer,
-        responses={
-            200: {"type": "object", "properties": {"otp": {"type": "string"}}},
-        },
-    )
 
+    @send_otp_schema
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
@@ -71,21 +64,7 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
-    @extend_schema(
-        summary="Verify OTP",
-        description="Verifies the provided OTP for a phone number. On success, marks the phone as verified and returns a JWT access token.",
-        request=VerifyOTPBodySerializer,
-        responses={
-            200: {
-                "type": "object",
-                "properties": {
-                    "message": {"type": "string", "example": "OTP verified successfully"},
-                    "access": {"type": "string", "example": "jwt_access_token"}
-                }
-            },
-        },
-    )
-
+    @verify_otp_schema
     @validate_request(VerifyOTPBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
