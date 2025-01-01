@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'silk',
     'rest_framework_simplejwt.token_blacklist',
     'commands',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
