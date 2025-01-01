@@ -71,6 +71,21 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
+    @extend_schema(
+        summary="Verify OTP",
+        description="Verifies the provided OTP for a phone number. On success, marks the phone as verified and returns a JWT access token.",
+        request=VerifyOTPBodySerializer,
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string", "example": "OTP verified successfully"},
+                    "access": {"type": "string", "example": "jwt_access_token"}
+                }
+            },
+        },
+    )
+
     @validate_request(VerifyOTPBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
