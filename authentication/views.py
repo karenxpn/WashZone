@@ -1,6 +1,7 @@
 import random
 import os
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
@@ -15,10 +16,21 @@ from twilio.rest import Client
 from .otp_redis import store_otp, retrieve_otp, delete_otp
 from .serializers.send_otp_body_serializer import SendOtpBodySerializer
 from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
+from drf_spectacular.utils import extend_schema
+
 
 
 # Create your views here.
 class SendOTPView(APIView):
+    @extend_schema(
+        summary="Send OTP",
+        description="Sends a One-Time Password (OTP) to the provided phone number. If the user does not exist, it creates a new user.",
+        request=SendOtpBodySerializer,
+        responses={
+            200: {"type": "object", "properties": {"otp": {"type": "string"}}},
+        },
+    )
+
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
