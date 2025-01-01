@@ -7,12 +7,14 @@ from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
+from services.schemas.providers_schemas import providers_schema
 from services.serializers.provider_serializer import (ProviderUpdateSerializer,
                                                       ProviderSerializer, \
     CreateProviderSerializer)
 from services.service_models.provider import Provider
 
 
+@providers_schema
 class ProviderViewSet(viewsets.ModelViewSet):
     queryset = Provider.objects.all()
     permission_classes = [IsAuthenticated]
