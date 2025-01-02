@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from WashZone.permissions import IsOwnerOrProvider, IsOwner
 from authentication.decorators import validate_request
 from orders.order_models.order import Order
+from orders.schemas import orders_schema
 from orders.serializers.create.create_order_serializer import CreateOrderSerializer
 from orders.serializers.order_serializer import OrderSerializer
 from orders.serializers.update_order_serializer import UpdateOrderSerializer
@@ -13,6 +14,7 @@ from orders.serializers.update_order_serializer import UpdateOrderSerializer
 
 # Create your views here.
 
+@orders_schema
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related('items__service', 'items__provider', 'items__features')
     permission_classes = [IsAuthenticated]
