@@ -47,7 +47,7 @@ features_schema = extend_schema_view(
         summary="Delete Feature",
         description="Delete a feature. Only accessible by admins.",
         responses={
-            204: OpenApiResponse(description="Category deleted successfully."),
+            204: OpenApiResponse(description="Feature deleted successfully."),
         },
     ),
 )

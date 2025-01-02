@@ -20,6 +20,7 @@ def add_feature_to_service(self, request):
     feature_id = request.data.get('feature_id')
     is_included = request.data.get('is_included', False)
     extra_cost = request.data.get('extra_cost', None)
+    extra_time_in_minutes = request.data.get('extra_time_in_minutes', 0)
 
     if not feature_id:
         return Response({"message": "Feature ID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -39,7 +40,7 @@ def add_feature_to_service(self, request):
             owner=request.user,
             service=service,
             feature=feature,
-            defaults={'is_included': is_included, 'extra_cost': extra_cost}
+            defaults={'is_included': is_included, 'extra_cost': extra_cost, 'extra_time_in_minutes': extra_time_in_minutes}
         )
 
         serializer = ServiceFeatureSerializer(service_feature)

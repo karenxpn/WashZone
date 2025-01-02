@@ -48,7 +48,7 @@ providers_schema = extend_schema_view(
         summary="Delete Provider",
         description="Delete the provider. Only accessible by admins.",
         responses={
-            204: OpenApiResponse(description="Category deleted successfully."),
+            204: OpenApiResponse(description="Provider deleted successfully."),
         },
     ),
 )
