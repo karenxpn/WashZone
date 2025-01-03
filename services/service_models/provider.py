@@ -15,7 +15,6 @@ class Provider(models.Model):
     contact_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
     location = PointField()
-    timezone = models.CharField(max_length=50, default="UTC")
 
 
     rating = models.FloatField(
