@@ -70,7 +70,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return add_feature_to_service(self, request)
 
     @remove_feature_schema
-    @action(detail=True, methods=['delete'], url_path='remove-feature/(?P<feature_id>\d+)')
+    @action(detail=True, methods=['delete'], url_path=r'remove-feature/(?P<feature_id>\d+)')
     def remove_feature(self, request, pk=None, feature_id=None):
         return remove_feature(self, request, pk, feature_id)
 
