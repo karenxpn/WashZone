@@ -34,7 +34,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'condor-equipped-terminally.ngrok-free.app']
 
 
 # Application definition
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'silk',
     'rest_framework_simplejwt.token_blacklist',
     'commands',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -163,6 +164,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 REDIS_HOST = 'localhost'

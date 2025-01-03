@@ -5,10 +5,12 @@ from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
+from services.schemas.features_schemas import features_schema
 from services.serializers.feature_serializer import FeatureSerializer, FeatureUpdateSerializer
 from services.service_models.feature import Feature
 
 
+@features_schema
 class FeatureViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Feature.objects.all()

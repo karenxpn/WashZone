@@ -4,9 +4,8 @@ from services.service_models.feature import ServiceFeature, Feature
 from services.service_views.add_feature_to_service import validate_ownership
 
 
-def remove_feature(self, request, pk=None):
+def remove_feature(self, request, pk=None, feature_id=None):
     service = self.get_object()
-    feature_id = request.data.get('feature_id')
 
     if not feature_id:
         return Response({"message": "Feature ID is required."}, status=status.HTTP_400_BAD_REQUEST)

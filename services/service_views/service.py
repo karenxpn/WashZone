@@ -7,6 +7,8 @@ from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from authentication.decorators import validate_request
+from services.schemas.service_schemas import service_schemas, additional_features_list_schema, add_feature_schema, \
+    remove_feature_schema, update_feature_schema
 from services.serializers.service_feature_serializer import ServiceFeatureSerializer
 from services.serializers.service_serializer import ServiceSerializer, ServiceUpdateSerializer, ServiceListSerializer, \
     CreateServiceSerializer
@@ -17,6 +19,7 @@ from services.service_views.remove_feature_from_service import remove_feature
 from services.service_views.update_linked_feature import update_feature
 
 
+@service_schemas
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     permission_classes = [IsAuthenticated]
@@ -50,6 +53,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    @additional_features_list_schema
     @action(detail=True, methods=['get'], url_path='additional-features')
     def additional_features(self, request, pk=None):
         try:
@@ -60,14 +64,17 @@ class ServiceViewSet(viewsets.ModelViewSet):
         except Service.DoesNotExist:
             return Response({"message": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @add_feature_schema
     @action(detail=True, methods=['post'], url_path='add-feature')
     def add_feature(self, request, pk=None):
         return add_feature_to_service(self, request)
 
-    @action(detail=True, methods=['delete'], url_path='remove-feature')
-    def remove_feature(self, request, pk=None):
-        return remove_feature(self, request)
+    @remove_feature_schema
+    @action(detail=True, methods=['delete'], url_path='remove-feature/(?P<feature_id>\d+)')
+    def remove_feature(self, request, pk=None, feature_id=None):
+        return remove_feature(self, request, pk, feature_id)
 
+    @update_feature_schema
     @action(detail=True, methods=['patch'], url_path='update-feature')
     def update_feature(self, request, pk=None):
         return update_feature(self, request, pk)

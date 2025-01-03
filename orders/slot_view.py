@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from WashZone.permissions import IsOwnerOrProvider
 from authentication.decorators import validate_request
 from orders.order_models.time_slot import TimeSlot
+from orders.schemas import close_time_slot_schema, closed_time_slots_list_schema
 from orders.serializers.time_slot_serializer import CloseTimeSlotSerializer, TimeSlotSerializer
 
 
@@ -19,6 +20,7 @@ class SlotView(APIView):
             return [IsAuthenticated(), IsAdminUser(), IsOwnerOrProvider()]
         return [IsAuthenticated()]
 
+    @close_time_slot_schema
     @validate_request(CloseTimeSlotSerializer)
     def post(self, request):
         serializer = CloseTimeSlotSerializer(data=request.data, context={'request': request})
@@ -31,6 +33,7 @@ class SlotView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+    @closed_time_slots_list_schema
     def get(self, request):
         string_date = request.query_params.get('date')
         provider = request.query_params.get('provider', None)

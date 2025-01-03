@@ -10,7 +10,10 @@ from authentication.decorators import validate_request
 from services.serializers.category_serializer import CategorySerializer, CategoryUpdateSerializer
 from services.serializers.provider_serializer import ProviderSerializer
 from services.service_models.category import Category
+from services.schemas.category_schemas import category_schema, category_provider_schema
 
+
+@category_schema
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()
@@ -31,6 +34,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             return Response({"message": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+    @category_provider_schema
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def providers(self, request, pk=None):
         try:

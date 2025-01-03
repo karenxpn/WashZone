@@ -13,12 +13,16 @@ from user.models import User
 from twilio.rest import Client
 
 from .otp_redis import store_otp, retrieve_otp, delete_otp
+from .schemas import send_otp_schema, verify_otp_schema
 from .serializers.send_otp_body_serializer import SendOtpBodySerializer
 from .serializers.verify_otp_body_serializer import VerifyOTPBodySerializer
 
 
+
 # Create your views here.
 class SendOTPView(APIView):
+
+    @send_otp_schema
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
@@ -59,6 +63,7 @@ class SendOTPView(APIView):
             )
 
 class VerifyOTPView(APIView):
+    @verify_otp_schema
     @validate_request(VerifyOTPBodySerializer)
     def post(self, request):
         validated_data = request.validated_data

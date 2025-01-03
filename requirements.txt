@@ -37,3 +37,4 @@ twilio==9.3.7
 typing_extensions==4.12.2
 urllib3==2.2.3
 yarl==1.18.0
+drf-spectacular~=0.28.0

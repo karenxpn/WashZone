@@ -4,11 +4,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authentication.decorators import validate_request
+from user.schemas import user_schema
 from user.serializers.update_user_serializer import UpdateUserSerializer
 from user.serializers.user_serializer import UserSerializer
 
 
-# Create your views here.
+@user_schema
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
