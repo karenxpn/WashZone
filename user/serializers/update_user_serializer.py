@@ -19,6 +19,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             'notifications_enabled',
             'latitude',
             'longitude',
+            'image'
         )
 
     # validations
