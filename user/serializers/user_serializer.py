@@ -17,7 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
                   'email_promotions_enabled',
                   'notifications_enabled',
                   'latitude',
-                  'longitude',)
+                  'longitude',
+                  'image')
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip()

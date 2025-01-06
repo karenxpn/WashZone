@@ -1,7 +1,7 @@
 from django.contrib.gis.db.models.functions import Distance
 from django.db import IntegrityError
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound, NotAuthenticated
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
@@ -36,7 +36,7 @@ class ProviderViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    @validate_request(ProviderSerializer)
+    @validate_request(CreateProviderSerializer)
     def create(self, request, *args, **kwargs):
         try:
             return super().create(request, *args, **kwargs)

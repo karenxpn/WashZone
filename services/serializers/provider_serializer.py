@@ -1,5 +1,8 @@
-from rest_framework import serializers
+import json
+from typing import MutableMapping
 
+from rest_framework import serializers
+import ast
 from WashZone.location_validation import validate_location
 from services.models import Provider
 from django.contrib.gis.geos import Point
@@ -49,12 +52,19 @@ class CreateProviderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'category', 'owner', 'name', 'description', 'address',
             'contact_number', 'email', 'latitude', 'longitude', 'rating', 'number_of_reviews',
-            'working_hours', 'special_closures'
+            'working_hours', 'special_closures', 'image'
         ]
 
         read_only_fields = ['id', 'rating', 'number_of_reviews']
 
+    def to_internal_value(self, data):
+        print(data)
+        return super().to_internal_value(data)
+
+
     def create(self, validated_data):
+        print("Validated data:", validated_data)
+
         latitude = validated_data.pop('latitude')
         longitude = validated_data.pop('longitude')
 
@@ -98,6 +108,7 @@ class ProviderUpdateSerializer(serializers.ModelSerializer):
             'location': {'required': False},
             'working_hours': {'required': False},
             'special_closures': {'required': False},
+            'image': {'required': False}
         }
 
     def to_representation(self, instance):
