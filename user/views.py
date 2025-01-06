@@ -1,10 +1,11 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authentication.decorators import validate_request
-from user.schemas import user_schema
+from user.schemas import user_schema, presigned_url_schema
 from user.serializers.update_user_serializer import UpdateUserSerializer
 from user.serializers.user_serializer import UserSerializer
 import boto3
@@ -44,6 +45,7 @@ class UserDetailView(APIView):
 class PresignedURLView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @presigned_url_schema
     def post(self, request):
         file_name = request.data.get('file_name')
         file_type = request.data.get('file_type')
