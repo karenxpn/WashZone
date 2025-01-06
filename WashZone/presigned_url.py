@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
-def generate_presigned_url(file_name, file_type):
+def generate_presigned_url(file_name, file_type, path):
     if not file_name or not file_type:
         return Response({'message': 'Missing file_name or file_type'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -15,7 +15,7 @@ def generate_presigned_url(file_name, file_type):
             'put_object',
             Params={
                 'Bucket': bucket_name,
-                'Key': f'users/{file_name}',
+                'Key': f'{path}/{file_name}',
                 'ContentType': file_type
             },
             ExpiresIn=3600

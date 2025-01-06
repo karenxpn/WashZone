@@ -49,4 +49,4 @@ class PresignedURLView(APIView):
         file_name = request.data.get('file_name')
         file_type = request.data.get('file_type')
 
-        return generate_presigned_url(file_name, file_type)
+        return generate_presigned_url(file_name, file_type, 'users')
