@@ -27,9 +27,12 @@ class ProviderViewSetTests(APITestCase):
             'category': self.category.id,
             'name': 'test provider',
             'address': 'test address',
-            "latitude": 40.139402,
-            "longitude": 44.5020637,
-            "working_hours": []
+            'latitude': 40.139402,
+            'longitude': 44.5020637,
+            'working_hours': [
+                    {'weekday': 0, 'opening_time': '09:00:00', 'closing_time': '17:00:00'},
+                    {'weekday': 1, 'opening_time': '09:00:00', 'closing_time': '17:00:00'}
+                ]
         }
 
         self.invalid_create_payload = {
@@ -74,7 +77,10 @@ class ProviderViewSetTests(APITestCase):
 
     def test_create_provider_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
+        print("Payload being sent:", self.valid_create_payload)  # Add this debug print
+
         response = self.api_client.post(reverse('provider-list'), data=self.valid_create_payload, format='json')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_provider_invalid_payload(self):
@@ -97,7 +103,7 @@ class ProviderViewSetTests(APITestCase):
     def test_update_provider_authenticated_owner(self):
         self.api_client.force_authenticate(user=self.user)
         payload = self.valid_update_payload
-        response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='json')
+        response = self.api_client.patch(reverse('provider-detail', kwargs={'pk': self.provider.pk}), payload, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_provider_invalid_payload(self):
@@ -114,7 +120,7 @@ class ProviderViewSetTests(APITestCase):
 
     def test_delete_provider_authenticated_not_owner(self):
         self.api_client.force_authenticate(user=self.user2)
-        response = self.api_client.delete(reverse('provider-detail', kwargs={'pk': self.provider.pk}), format='json')
+        response = self.api_client.delete(reverse('provider-detail', kwargs={'pk': self.provider.pk}), format='multipart')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_provider_authenticated_owner(self):

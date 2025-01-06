@@ -19,7 +19,6 @@ from services.service_models.provider import Provider
 class ProviderViewSet(viewsets.ModelViewSet):
     queryset = Provider.objects.all()
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get_serializer_class(self):
         if self.action == 'create':
