@@ -49,7 +49,7 @@ class CreateProviderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'category', 'owner', 'name', 'description', 'address',
             'contact_number', 'email', 'latitude', 'longitude', 'rating', 'number_of_reviews',
-            'working_hours', 'special_closures'
+            'working_hours', 'special_closures', 'image'
         ]
 
         read_only_fields = ['id', 'rating', 'number_of_reviews']
@@ -98,6 +98,7 @@ class ProviderUpdateSerializer(serializers.ModelSerializer):
             'location': {'required': False},
             'working_hours': {'required': False},
             'special_closures': {'required': False},
+            'image': {'required': False}
         }
 
     def to_representation(self, instance):
