@@ -1,5 +1,4 @@
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,7 +12,6 @@ from user.serializers.user_serializer import UserSerializer
 @user_schema
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user)

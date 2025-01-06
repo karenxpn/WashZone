@@ -2,7 +2,6 @@ from django.contrib.gis.db.models.functions import Distance
 from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
