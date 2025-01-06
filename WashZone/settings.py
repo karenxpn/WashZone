@@ -34,7 +34,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'condor-equipped-terminally.ngrok-free.app']
+ALLOWED_HOSTS = ['localhost', 'condor-equipped-terminally.ngrok-free.app', '0.0.0.0']
 
 
 # Application definition
