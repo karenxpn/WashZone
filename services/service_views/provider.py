@@ -66,11 +66,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
             return Response({"message": "Provider not found"}, status=status.HTTP_404_NOT_FOUND)
 
     @presigned_url_schema
-    @action(detail=False, methods=['post'], url_path='presigned-url')
+    @action(detail=False, methods=['post'], url_path='presigned-url', permission_classes=[IsAuthenticated, IsAdminUser])
     def presigned_url(self, request):
-        if not request.user.is_staff:
-            return Response({'message': 'Only staff user can get the presigned url'}, status=status.HTTP_403_FORBIDDEN)
-
         file_name = request.data.get('file_name')
         file_type = request.data.get('file_type')
 
