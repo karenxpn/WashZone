@@ -153,7 +153,7 @@ class ProviderViewSetTests(APITestCase):
         response = self.api_client.post(reverse('provider-presigned-url'), data=self.presigned_url_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_presigned_url_invalid_payload(self, mock_boto_client):
+    def test_get_presigned_url_invalid_payload(self):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.post(reverse('provider-presigned-url'), data=self.presigned_url_invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
