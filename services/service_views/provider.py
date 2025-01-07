@@ -1,17 +1,20 @@
 from django.contrib.gis.db.models.functions import Distance
 from django.db import IntegrityError
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
+from WashZone.presigned_url import generate_presigned_url
 from authentication.decorators import validate_request
 from services.schemas.providers_schemas import providers_schema
 from services.serializers.provider_serializer import (ProviderUpdateSerializer,
                                                       ProviderSerializer, \
     CreateProviderSerializer)
 from services.service_models.provider import Provider
+from user.schemas import presigned_url_schema
 
 
 @providers_schema
@@ -61,3 +64,14 @@ class ProviderViewSet(viewsets.ModelViewSet):
             return Response({"message": "Provider deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except NotFound:
             return Response({"message": "Provider not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    @presigned_url_schema
+    @action(detail=False, methods=['post'], url_path='presigned-url')
+    def presigned_url(self, request):
+        if not request.user.is_staff:
+            return Response({'message': 'Only staff user can get the presigned url'}, status=status.HTTP_403_FORBIDDEN)
+
+        file_name = request.data.get('file_name')
+        file_type = request.data.get('file_type')
+
+        return generate_presigned_url(file_name, file_type, 'providers')
