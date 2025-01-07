@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiRequest
 
 from user.serializers.update_user_serializer import UpdateUserSerializer
 from user.serializers.user_serializer import UserSerializer
@@ -24,4 +24,19 @@ user_schema = extend_schema_view(
             204: {"type": "object", "properties": {"message": {"type": "string"}}},
         },
     ),
+)
+
+presigned_url_schema = extend_schema(
+    summary="Get Presigned URL",
+    description="Gets a presigned URL for the currently authenticated user.",
+    request=OpenApiRequest({
+        'type': 'object',
+        'properties': {
+            'file_name': {'type': 'string'},
+            'file_type': {'type': 'string'},
+        }
+    }),
+    responses={
+        200: {"type": "object", "properties": {"presigned_url": {"type": "string"}}},
+    }
 )

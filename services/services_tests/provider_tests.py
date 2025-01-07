@@ -1,3 +1,6 @@
+import logging
+from unittest.mock import patch
+
 from django.contrib.gis.geos import Point
 from django.urls import reverse
 from rest_framework import status
@@ -48,6 +51,13 @@ class ProviderViewSetTests(APITestCase):
             "longitude": -404.5020637,
         }
 
+        self.presigned_url_valid_payload = {
+            'file_name': 'filename',
+            'file_type': 'file_type'
+        }
+
+        self.presigned_url_invalid_payload = {}
+
         self.api_client = APIClient()
 
 
@@ -77,10 +87,7 @@ class ProviderViewSetTests(APITestCase):
 
     def test_create_provider_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
-        print("Payload being sent:", self.valid_create_payload)  # Add this debug print
-
         response = self.api_client.post(reverse('provider-list'), data=self.valid_create_payload, format='json')
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_provider_invalid_payload(self):
@@ -127,3 +134,26 @@ class ProviderViewSetTests(APITestCase):
         self.api_client.force_authenticate(user=self.user)
         response = self.api_client.delete(reverse('provider-detail', kwargs={'pk': self.provider.pk}), format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_get_presigned_url_not_authenticated(self):
+        response = self.api_client.post(reverse('provider-presigned-url'), data=self.presigned_url_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_presigned_url_not_staff(self):
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.post(reverse('provider-presigned-url'), data=self.presigned_url_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @patch('boto3.client')
+    def test_get_presigned_url_authenticated(self, mock_boto_client):
+        mock_s3 = mock_boto_client.return_value
+        mock_s3.generate_presigned_url.return_value = "https://example.com/fake-url"
+
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.post(reverse('provider-presigned-url'), data=self.presigned_url_valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_presigned_url_invalid_payload(self):
+        self.api_client.force_authenticate(user=self.user)
+        response = self.api_client.post(reverse('provider-presigned-url'), data=self.presigned_url_invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

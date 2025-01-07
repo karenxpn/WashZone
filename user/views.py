@@ -3,8 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from WashZone.presigned_url import generate_presigned_url
 from authentication.decorators import validate_request
-from user.schemas import user_schema
+from user.schemas import user_schema, presigned_url_schema
 from user.serializers.update_user_serializer import UpdateUserSerializer
 from user.serializers.user_serializer import UserSerializer
 
@@ -12,6 +13,7 @@ from user.serializers.user_serializer import UserSerializer
 @user_schema
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'delete', 'presigned']
 
     def get(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user)
@@ -36,3 +38,15 @@ class UserDetailView(APIView):
         return Response({
             "message": "User deleted successfully."
         }, status=status.HTTP_204_NO_CONTENT)
+
+
+
+class PresignedURLView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @presigned_url_schema
+    def post(self, request):
+        file_name = request.data.get('file_name')
+        file_type = request.data.get('file_type')
+
+        return generate_presigned_url(file_name, file_type, 'users')
