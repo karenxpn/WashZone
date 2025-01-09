@@ -6,7 +6,7 @@ from .views import OrderViewSet
 
 
 router = DefaultRouter(trailing_slash=False)
-router.register(r'api/v1/orders', OrderViewSet, basename='order')
+router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
     path('', include(router.urls)),
