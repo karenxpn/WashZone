@@ -202,3 +202,6 @@ SPECTACULAR_SETTINGS = {
         {'url': 'https://washzone.am/api/v1', 'description': 'Production server'}
     ],
 }
+
+if os.getcwd() == '/app':
+    DEBUG = False
