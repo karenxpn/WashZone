@@ -158,6 +158,8 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_ROOT = BASE_DIR / 'static/images'
 
 # Default primary key field type
@@ -202,6 +204,9 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_NO_READ_ONLY_REQUIRED': True,
 
     'DISABLE_ERRORS_AND_WARNINGS': True,
+
+    'SERVE_PUBLIC': True,  # Important for serving Swagger UI
+    'SERVE_AUTHENTICATION': None,  # Allow unauthenticated access to schema
 
     'SERVERS': [
         {'url': 'https://condor-equipped-terminally.ngrok-free.app/api/v1', 'description': 'Development server'},
