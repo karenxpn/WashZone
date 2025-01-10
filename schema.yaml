@@ -1,0 +1,2654 @@
+openapi: 3.0.3
+info:
+  title: WashZone APIs
+  version: 1.0.0
+paths:
+  /api/v1/slots:
+    get:
+      operationId: api_v1_slots_list
+      description: This endpoint retrieves all closed time slots for a specific provider
+        on a specific date. The response contains all the slots that are unavailable
+        for booking.
+      summary: Retrieve closed time slots
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeSlot'
+          description: ''
+        '400':
+          description: Missing or invalid parameters
+    post:
+      operationId: api_v1_slots_create
+      description: This endpoint allows an admin to close a time slot for a provider.
+        The slot will be marked as unavailable for booking.
+      summary: Close a time slot
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseTimeSlot'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CloseTimeSlot'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CloseTimeSlot'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Slot closed successfully
+        '400':
+          description: Invalid data provided
+  /auth/send-otp:
+    post:
+      operationId: auth_send_otp_create
+      description: Sends a One-Time Password (OTP) to the provided phone number. If
+        the user does not exist, it creates a new user.
+      summary: Send OTP
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendOtpBody'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendOtpBody'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendOtpBody'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  otp:
+                    type: string
+          description: ''
+  /auth/verify-otp:
+    post:
+      operationId: auth_verify_otp_create
+      description: Verifies the provided OTP for a phone number. On success, marks
+        the phone as verified and returns a JWT access token.
+      summary: Verify OTP
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPBody'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPBody'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPBody'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP verified successfully
+                  access:
+                    type: string
+                    example: jwt_access_token
+          description: ''
+  /categories:
+    get:
+      operationId: categories_list
+      description: Retrieve a list of all categories.
+      summary: List Categories
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - categories
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryList'
+          description: ''
+    post:
+      operationId: categories_create
+      description: Create a new category. Only accessible by super admins.
+      summary: Create Category
+      tags:
+      - categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Category'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Category'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /categories/{id}:
+    get:
+      operationId: categories_retrieve
+      description: Retrieve details of a specific category by ID.
+      summary: Retrieve Category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this category.
+        required: true
+      tags:
+      - categories
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+    put:
+      operationId: categories_update
+      description: Update details of an existing category. Only accessible by super
+        admins.
+      summary: Update Category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this category.
+        required: true
+      tags:
+      - categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryUpdate'
+          description: ''
+    patch:
+      operationId: categories_partial_update
+      description: Partially update details of an existing category. Only accessible
+        by super admins.
+      summary: Partial Update Category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this category.
+        required: true
+      tags:
+      - categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryUpdate'
+          description: ''
+    delete:
+      operationId: categories_destroy
+      description: Delete a category. Only accessible by super admins.
+      summary: Delete Category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this category.
+        required: true
+      tags:
+      - categories
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Category deleted successfully.
+  /categories/{id}/providers:
+    get:
+      operationId: categories_providers_list
+      description: Retrieve all providers associated with a specific category. This
+        endpoint returns a list of providers that belong to the specified category.
+      summary: List Providers for a Category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this category.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - categories
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProviderList'
+          description: ''
+  /features:
+    get:
+      operationId: features_list
+      description: Retrieve a list of all features.
+      summary: List Features
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - features
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFeatureList'
+          description: ''
+    post:
+      operationId: features_create
+      description: Create a new feature. Only accessible by admins.
+      summary: Create Feature
+      tags:
+      - features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Feature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Feature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Feature'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feature'
+          description: ''
+  /features/{id}:
+    get:
+      operationId: features_retrieve
+      description: Retrieve details of a specific feature by ID.
+      summary: Retrieve Feature
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this feature.
+        required: true
+      tags:
+      - features
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feature'
+          description: ''
+    put:
+      operationId: features_update
+      description: Update details of an existing feature. Only accessible by admins.
+      summary: Update Feature
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this feature.
+        required: true
+      tags:
+      - features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdate'
+          description: ''
+    patch:
+      operationId: features_partial_update
+      description: Partially update details of an existing feature. Only accessible
+        by admins.
+      summary: Partial Update Feature
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this feature.
+        required: true
+      tags:
+      - features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFeatureUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFeatureUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFeatureUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdate'
+          description: ''
+    delete:
+      operationId: features_destroy
+      description: Delete a feature. Only accessible by admins.
+      summary: Delete Feature
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this feature.
+        required: true
+      tags:
+      - features
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Feature deleted successfully.
+  /orders:
+    get:
+      operationId: orders_list
+      description: Retrieve a list of all orders.
+      summary: List Orders
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderList'
+          description: ''
+    post:
+      operationId: orders_create
+      description: Create a new order.
+      summary: Create Order
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrder'
+          description: ''
+  /orders/{id}:
+    get:
+      operationId: orders_retrieve
+      description: Retrieve details of a specific order by ID.
+      summary: Retrieve Order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+    put:
+      operationId: orders_update
+      description: Update details of an existing order.
+      summary: Update Order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateOrder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOrder'
+          description: ''
+    patch:
+      operationId: orders_partial_update
+      description: Partially update details of an existing order.
+      summary: Partial Update Order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateOrder'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOrder'
+          description: ''
+    delete:
+      operationId: orders_destroy
+      description: Delete a Order.
+      summary: Delete Order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - orders
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Category deleted successfully.
+  /providers:
+    get:
+      operationId: providers_list
+      description: Retrieve a list of all providers.
+      summary: List Providers
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - providers
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProviderList'
+          description: ''
+    post:
+      operationId: providers_create
+      description: Create a new provider. Only accessible by admins.
+      summary: Create Provider
+      tags:
+      - providers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProvider'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateProvider'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateProvider'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProvider'
+          description: ''
+  /providers/{id}:
+    get:
+      operationId: providers_retrieve
+      description: Retrieve details of a specific provider by ID.
+      summary: Retrieve Provider
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this provider.
+        required: true
+      tags:
+      - providers
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+          description: ''
+    put:
+      operationId: providers_update
+      description: Update details of an existing provider. Only accessible by admins.
+      summary: Update Provider
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this provider.
+        required: true
+      tags:
+      - providers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProviderUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProviderUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderUpdate'
+          description: ''
+    patch:
+      operationId: providers_partial_update
+      description: Partially update details of an existing provider. Only accessible
+        by admins.
+      summary: Partial Update Provider
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this provider.
+        required: true
+      tags:
+      - providers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProviderUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProviderUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProviderUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderUpdate'
+          description: ''
+    delete:
+      operationId: providers_destroy
+      description: Delete the provider. Only accessible by admins.
+      summary: Delete Provider
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this provider.
+        required: true
+      tags:
+      - providers
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Provider deleted successfully.
+  /providers/presigned-url:
+    post:
+      operationId: providers_presigned_url_create
+      description: Gets a presigned URL for the currently authenticated user.
+      summary: Get Presigned URL
+      tags:
+      - providers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file_type:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file_type:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file_type:
+                  type: string
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  presigned_url:
+                    type: string
+          description: ''
+  /schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /services:
+    get:
+      operationId: services_list
+      description: Retrieve a list of all services.
+      summary: List Services
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - services
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedServiceListList'
+          description: ''
+    post:
+      operationId: services_create
+      description: Create a new service. Only accessible by admins.
+      summary: Create Service
+      tags:
+      - services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateService'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateService'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateService'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateService'
+          description: ''
+  /services/{id}:
+    get:
+      operationId: services_retrieve
+      description: Retrieve details of a specific service by ID.
+      summary: Retrieve Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: ''
+    put:
+      operationId: services_update
+      description: Update details of an existing service. Only accessible by admins.
+      summary: Update Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceUpdate'
+          description: ''
+    patch:
+      operationId: services_partial_update
+      description: Partially update details of an existing service. Only accessible
+        by admins.
+      summary: Partial Update Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedServiceUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedServiceUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedServiceUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceUpdate'
+          description: ''
+    delete:
+      operationId: services_destroy
+      description: Delete the service. Only accessible by admins.
+      summary: Delete Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Service deleted successfully.
+  /services/{id}/add-feature:
+    post:
+      operationId: services_add_feature_create
+      description: Associate a feature with a specific service. You can specify if
+        the feature is included and define any additional cost if applicable.
+      summary: Add a Feature to a Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddFeatureRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddFeatureRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddFeatureRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceFeature'
+          description: ''
+  /services/{id}/additional-features:
+    get:
+      operationId: services_additional_features_list
+      description: Retrieve features associated with a specific service that are not
+        included. This endpoint returns a list of additional features that a service
+        offers.
+      summary: Retrieve Additional Features for a Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - services
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedServiceFeatureList'
+          description: ''
+  /services/{id}/remove-feature/{feature_id}:
+    delete:
+      operationId: services_remove_feature_destroy
+      description: Remove the association of a feature from a specific service. This
+        action does not delete the feature itself, only the relationship between the
+        feature and the service.
+      summary: Remove a Feature from a Service
+      parameters:
+      - in: path
+        name: feature_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Feature removed from service successfully.
+  /services/{id}/update-feature:
+    patch:
+      operationId: services_update_feature_partial_update
+      description: Update the details of a specific feature linked to a service. You
+        can modify whether the feature is included, its extra cost, or extra time
+        in minutes.
+      summary: Update a Feature in a Service
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this service.
+        required: true
+      tags:
+      - services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateFeatureRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateFeatureRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateFeatureRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceFeature'
+          description: ''
+  /user:
+    get:
+      operationId: user_retrieve
+      description: Retrieves the details of the currently authenticated user.
+      summary: Get User Details
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: user_create
+      description: Updates the details of the currently authenticated user. Partial
+        updates are supported.
+      summary: Update User Details
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+    delete:
+      operationId: user_destroy
+      description: Deletes the currently authenticated user's account.
+      summary: Delete User Account
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /user/presigned-url:
+    post:
+      operationId: user_presigned_url_create
+      description: Gets a presigned URL for the currently authenticated user.
+      summary: Get Presigned URL
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file_type:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file_type:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file_type:
+                  type: string
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  presigned_url:
+                    type: string
+          description: ''
+components:
+  schemas:
+    AddFeatureRequest:
+      type: object
+      properties:
+        feature_id:
+          type: integer
+        is_included:
+          type: boolean
+          default: false
+        extra_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        extra_time_in_minutes:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+      required:
+      - feature_id
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    CategoryUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - updated_at
+    CloseTimeSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        is_available:
+          type: boolean
+        provider:
+          type: integer
+      required:
+      - end_time
+      - id
+      - provider
+      - start_time
+    CreateOrder:
+      type: object
+      properties:
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        service:
+          type: integer
+        provider:
+          type: integer
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateOrderFeature'
+          writeOnly: true
+        order_total:
+          type: string
+          readOnly: true
+        order_duration:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+          writeOnly: true
+        end_time:
+          type: string
+          format: date-time
+          writeOnly: true
+      required:
+      - end_time
+      - features
+      - order_duration
+      - order_total
+      - owner
+      - provider
+      - service
+      - start_time
+    CreateOrderFeature:
+      type: object
+      properties:
+        feature:
+          type: integer
+      required:
+      - feature
+    CreateProvider:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        category:
+          type: integer
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+        contact_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        rating:
+          type: number
+          format: double
+          readOnly: true
+          description: Rating from 0 to 5
+        number_of_reviews:
+          type: integer
+          readOnly: true
+        working_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkingHour'
+        special_closures:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialClosure'
+        image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+      required:
+      - address
+      - category
+      - id
+      - latitude
+      - longitude
+      - name
+      - number_of_reviews
+      - owner
+      - rating
+      - working_hours
+    CreateService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceFeature'
+          readOnly: true
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        duration_in_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        provider:
+          type: integer
+      required:
+      - base_price
+      - created_at
+      - duration_in_minutes
+      - features
+      - id
+      - name
+      - owner
+      - provider
+      - updated_at
+    Feature:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - owner
+      - updated_at
+    FeatureUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner:
+          type: integer
+      required:
+      - created_at
+      - id
+      - updated_at
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: integer
+        provider:
+          $ref: '#/components/schemas/Provider'
+        time_slot:
+          $ref: '#/components/schemas/TimeSlot'
+        service:
+          allOf:
+          - $ref: '#/components/schemas/OrderService'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderFeature'
+          readOnly: true
+        order_total:
+          type: string
+          readOnly: true
+        order_duration:
+          type: string
+          readOnly: true
+      required:
+      - features
+      - id
+      - order_duration
+      - order_total
+      - owner
+      - provider
+      - service
+      - time_slot
+    OrderFeature:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        extra_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        extra_duration:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - description
+      - id
+      - name
+    OrderService:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        base_price:
+          type: string
+        duration:
+          type: string
+      required:
+      - base_price
+      - description
+      - duration
+      - id
+      - name
+    PaginatedCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    PaginatedFeatureList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feature'
+    PaginatedOrderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+    PaginatedProviderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Provider'
+    PaginatedServiceFeatureList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceFeature'
+    PaginatedServiceListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceList'
+    PatchedCategoryUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedFeatureUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner:
+          type: integer
+    PatchedProviderUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        working_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkingHour'
+        special_closures:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialClosure'
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+        contact_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        location:
+          type: string
+        rating:
+          type: number
+          format: double
+          maximum: 5.0
+          minimum: 0.0
+          description: Rating from 0 to 5
+        number_of_reviews:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          type: integer
+        owner:
+          type: integer
+          readOnly: true
+    PatchedServiceUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceFeature'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        duration_in_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        provider:
+          type: integer
+        owner:
+          type: integer
+          readOnly: true
+    PatchedUpdateFeatureRequest:
+      type: object
+      properties:
+        feature_id:
+          type: integer
+        is_included:
+          type: boolean
+          default: false
+        extra_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        extra_time_in_minutes:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+    PatchedUpdateOrder:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+    Provider:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        latitude:
+          type: string
+          readOnly: true
+        longitude:
+          type: string
+          readOnly: true
+        distance:
+          type: string
+          readOnly: true
+        working_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkingHour'
+          readOnly: true
+        special_closures:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialClosure'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+        contact_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        rating:
+          type: number
+          format: double
+          maximum: 5.0
+          minimum: 0.0
+          description: Rating from 0 to 5
+        number_of_reviews:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          type: integer
+      required:
+      - address
+      - category
+      - created_at
+      - distance
+      - id
+      - latitude
+      - longitude
+      - name
+      - owner
+      - special_closures
+      - updated_at
+      - working_hours
+    ProviderUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        working_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkingHour'
+        special_closures:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialClosure'
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+        contact_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        location:
+          type: string
+        rating:
+          type: number
+          format: double
+          maximum: 5.0
+          minimum: 0.0
+          description: Rating from 0 to 5
+        number_of_reviews:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          type: integer
+        owner:
+          type: integer
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - owner
+      - updated_at
+    SendOtpBody:
+      type: object
+      properties:
+        phone_number:
+          type: string
+      required:
+      - phone_number
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceFeature'
+          readOnly: true
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        duration_in_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        provider:
+          type: integer
+      required:
+      - base_price
+      - created_at
+      - duration_in_minutes
+      - features
+      - id
+      - name
+      - owner
+      - provider
+      - updated_at
+    ServiceFeature:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        feature_id:
+          type: integer
+          readOnly: true
+        is_included:
+          type: boolean
+        feature_name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+        extra_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Extra cost for the feature if it's optional
+        extra_time_in_minutes:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - description
+      - feature_id
+      - feature_name
+      - id
+      - owner
+      - updated_at
+    ServiceList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: string
+          nullable: true
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        duration_in_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        provider:
+          type: integer
+      required:
+      - base_price
+      - created_at
+      - duration_in_minutes
+      - id
+      - name
+      - owner
+      - provider
+      - updated_at
+    ServiceUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceFeature'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        duration_in_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        provider:
+          type: integer
+        owner:
+          type: integer
+          readOnly: true
+      required:
+      - created_at
+      - features
+      - id
+      - owner
+      - updated_at
+    SpecialClosure:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - date
+    StatusEnum:
+      enum:
+      - pending
+      - time_confirmation
+      - approved
+      - rejected
+      - cancelled
+      - completed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `time_confirmation` - Time Confirmation
+        * `approved` - Approved
+        * `rejected` - Rejected
+        * `cancelled` - Cancelled
+        * `completed` - Completed
+    TimeSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        is_available:
+          type: boolean
+      required:
+      - end_time
+      - id
+      - start_time
+    UpdateOrder:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - status
+    UpdateUser:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        email_promotions_enabled:
+          type: boolean
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        notifications_enabled:
+          type: boolean
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        full_name:
+          type: string
+          readOnly: true
+        email_promotions_enabled:
+          type: boolean
+        notifications_enabled:
+          type: boolean
+        latitude:
+          type: string
+          readOnly: true
+        longitude:
+          type: string
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+      required:
+      - full_name
+      - id
+      - latitude
+      - longitude
+      - username
+    VerifyOTPBody:
+      type: object
+      properties:
+        phone_number:
+          type: string
+        otp:
+          type: string
+          maxLength: 6
+          minLength: 6
+      required:
+      - otp
+      - phone_number
+    WeekdayEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - Monday
+        * `1` - Tuesday
+        * `2` - Wednesday
+        * `3` - Thursday
+        * `4` - Friday
+        * `5` - Saturday
+        * `6` - Sunday
+    WorkingHour:
+      type: object
+      properties:
+        weekday:
+          allOf:
+          - $ref: '#/components/schemas/WeekdayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        opening_time:
+          type: string
+          format: time
+        closing_time:
+          type: string
+          format: time
+      required:
+      - closing_time
+      - opening_time
+      - weekday
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+servers:
+- url: https://condor-equipped-terminally.ngrok-free.app/api/v1
+  description: Development server
+- url: https://washzone.am/api/v1
+  description: Production server

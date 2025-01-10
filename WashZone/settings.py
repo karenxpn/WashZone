@@ -197,6 +197,7 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
+    'DISABLE_ERRORS_AND_WARNINGS': True,
     'SERVERS': [
         {'url': 'https://condor-equipped-terminally.ngrok-free.app/api/v1', 'description': 'Development server'},
         {'url': 'https://washzone.am/api/v1', 'description': 'Production server'}
