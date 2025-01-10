@@ -68,6 +68,7 @@ additional_features_list_schema = extend_schema(
 )
 
 add_feature_schema = extend_schema(
+    methods=['POST'],
     summary="Add a Feature to a Service",
     description=(
         "Associate a feature with a specific service. You can specify if the feature is included "
@@ -101,6 +102,7 @@ remove_feature_schema = extend_schema(
 )
 
 update_feature_schema = extend_schema(
+    methods=['PATCH'],
     summary="Update a Feature in a Service",
     description=(
         "Update the details of a specific feature linked to a service. "
