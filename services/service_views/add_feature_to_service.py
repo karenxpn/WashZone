@@ -15,9 +15,8 @@ def validate_ownership(user, service=None, feature=None, service_feature=None):
         raise PermissionDenied("You do not own this service feature.")
 
 
-def add_feature_to_service(self, request):
+def add_feature_to_service(self, request,  pk=None, feature_id=None):
     service = self.get_object()
-    feature_id = request.data.get('feature_id')
     is_included = request.data.get('is_included', False)
     extra_cost = request.data.get('extra_cost', None)
     extra_time_in_minutes = request.data.get('extra_time_in_minutes', 0)

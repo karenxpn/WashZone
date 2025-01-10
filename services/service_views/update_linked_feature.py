@@ -6,9 +6,8 @@ from services.service_models.feature import ServiceFeature, Feature
 from services.service_views.add_feature_to_service import validate_ownership
 
 
-def update_feature(self, request, pk=None):
+def update_feature(self, request, pk=None, feature_id=None):
     service = self.get_object()
-    feature_id = request.data.get('feature_id')
     is_included = request.data.get('is_included')
     extra_cost = request.data.get('extra_cost')
     extra_time_in_minutes = request.data.get('extra_time_in_minutes', 0)

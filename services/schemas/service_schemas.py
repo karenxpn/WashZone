@@ -77,7 +77,6 @@ add_feature_schema = extend_schema(
     request=inline_serializer(
         name='AddFeatureRequest',
         fields={
-            'feature_id': serializers.IntegerField(required=True),
             'is_included': serializers.BooleanField(required=False, default=False),
             'extra_cost': serializers.DecimalField(required=False, max_digits=10, decimal_places=2, allow_null=True),
             'extra_time_in_minutes': serializers.DecimalField(required=False, max_digits=10, decimal_places=2, allow_null=True),
@@ -89,6 +88,7 @@ add_feature_schema = extend_schema(
 )
 
 remove_feature_schema = extend_schema(
+    methods=['DELETE'],
     summary="Remove a Feature from a Service",
     description=(
         "Remove the association of a feature from a specific service. This action does not delete the feature itself, "
@@ -111,7 +111,6 @@ update_feature_schema = extend_schema(
     request=inline_serializer(
         name='UpdateFeatureRequest',
         fields={
-            'feature_id': serializers.IntegerField(required=True),
             'is_included': serializers.BooleanField(required=False, default=False),
             'extra_cost': serializers.DecimalField(required=False, max_digits=10, decimal_places=2, allow_null=True),
             'extra_time_in_minutes': serializers.DecimalField(required=False, max_digits=10, decimal_places=2, allow_null=True),

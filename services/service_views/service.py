@@ -66,18 +66,15 @@ class ServiceViewSet(viewsets.ModelViewSet):
 
     @add_feature_schema
     @update_feature_schema
-
-    @action(detail=True, methods=['post', 'patch'], url_path=r'feature')
-    def add_update_feature(self, request, pk=None):
-        if request.method == 'POST':
-            return add_feature_to_service(self, request)
-        else:
-            return update_feature(self, request, pk)
-
     @remove_feature_schema
-    @action(detail=True, methods=['delete'], url_path=r'feature/(?P<feature_id>\d+)')
-    def remove_feature(self, request, pk=None, feature_id=None):
-        return remove_feature(self, request, pk, feature_id)
+    @action(detail=True, methods=['post', 'patch', 'delete'], url_path=r'feature/(?P<feature_id>\d+)')
+    def feature(self, request, pk=None, feature_id=None):
+        if request.method == 'POST':
+            return add_feature_to_service(self, request, pk, feature_id)
+        elif request.method == 'PATCH':
+            return update_feature(self, request, pk, feature_id)
+        else:
+            return remove_feature(self, request, pk, feature_id)
 
     @validate_request(ServiceSerializer)
     def create(self, request, *args, **kwargs):

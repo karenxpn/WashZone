@@ -61,7 +61,6 @@ class ServiceViewSetTests(APITestCase):
 
         self.add_feature_invalid_payload = {}
         self.update_feature_valid_payload = {
-            'feature_id': self.feature.id,
             'is_included': True
         }
 
@@ -181,88 +180,77 @@ class ServiceViewSetTests(APITestCase):
 
     # add feature to service tests
     def test_add_feature_not_authenticated(self):
-        response = self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.post(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                        self.add_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_add_feature_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
-        response = self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.post(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                        self.add_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_add_feature_invalid_payload(self):
-        self.api_client.force_authenticate(user=self.user)
-        response = self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
-                                       self.add_feature_invalid_payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_add_feature_not_owner(self):
         self.api_client.force_authenticate(user=self.user2)
-        response = self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.post(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                        self.add_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
     # remove feature tests
     def test_remove_feature_not_authenticated(self):
-        response = self.api_client.delete(reverse('service-remove-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}))
+        response = self.api_client.delete(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_remove_feature_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
-        self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        self.api_client.post(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                              self.add_feature_valid_payload, format='json')
 
-        response = self.api_client.delete(    reverse('service-remove-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}), format='json')
+        response = self.api_client.delete(    reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}), format='json')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_remove_feature_not_owner(self):
         self.api_client.force_authenticate(user=self.user2)
-        response = self.api_client.delete(    reverse('service-remove-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}), format='json')
+        response = self.api_client.delete(    reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}), format='json')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_remove_feature_invalid_feature_id(self):
         self.api_client.force_authenticate(user=self.user)
-        self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        self.api_client.post(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                              self.add_feature_valid_payload, format='json')
-        response = self.api_client.delete(    reverse('service-remove-feature', kwargs={'pk': self.service.pk, 'feature_id': 9999}), format='json')
+        response = self.api_client.delete(    reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': 9999}), format='json')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
     # update service feature tests
     def test_update_feature_not_authenticated(self):
-        response = self.api_client.patch(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.patch(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                          self.update_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_not_linked_feature_update(self):
         self.api_client.force_authenticate(user=self.user)
-        response = self.api_client.patch(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.patch(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                        self.update_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND) # not linked
 
     def test_update_feature_authenticated(self):
         self.api_client.force_authenticate(user=self.user)
-        self.api_client.post(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        self.api_client.post(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                              self.add_feature_valid_payload, format='json')
 
-        response = self.api_client.patch(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.patch(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                        self.update_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_update_feature_invalid_payload(self):
-        self.api_client.force_authenticate(user=self.user)
-        response = self.api_client.patch(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
-                                       self.update_feature_invalid_payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_update_feature_not_owner(self):
         self.api_client.force_authenticate(user=self.user2)
-        response = self.api_client.patch(reverse('service-add-update-feature', kwargs={'pk': self.service.pk}),
+        response = self.api_client.patch(reverse('service-feature', kwargs={'pk': self.service.pk, 'feature_id': self.feature.id}),
                                          self.update_feature_valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
