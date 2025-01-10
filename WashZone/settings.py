@@ -188,7 +188,6 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'WashZone APIs',
     'VERSION': '1.0.0',
@@ -198,7 +197,12 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
+
+    'COMPONENT_SPLIT_REQUEST': True,
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+
     'DISABLE_ERRORS_AND_WARNINGS': True,
+
     'SERVERS': [
         {'url': 'https://condor-equipped-terminally.ngrok-free.app/api/v1', 'description': 'Development server'},
         {'url': 'https://washzone.am/api/v1', 'description': 'Production server'}
