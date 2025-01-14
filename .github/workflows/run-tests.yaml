@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests and Deploy
 
 on:
   push:
@@ -90,3 +90,19 @@ jobs:
       run: |
         python manage.py migrate
         python manage.py test --parallel auto
+
+    - name: Deploy to Server
+      env:
+        HOST: ${{ secrets.DEPLOY_HOST }}
+        USER: ${{ secrets.DEPLOY_USER }}
+      run: |
+        ssh $USER@$HOST "
+          cd /home/ubuntu/apps/WashZone/ &&
+          git pull origin main &&
+          source myenv/bin/activate &&
+          pip install -r requirements.txt &&
+          python manage.py migrate &&
+          sudo supervisorctl restart WashZone &&
+          sudo systemctl restart gunicorn &&
+          sudo systemctl reload nginx
+        "
