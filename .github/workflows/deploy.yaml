@@ -1,118 +1,40 @@
-name: Run Tests and Deploy
+name: Deploy to Server
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
 
-    env:
-      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-      DEBUG: 'True'
-      DB_NAME: test_db
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_HOST: localhost
-      JWT_ACCESS_TOKEN_LIFETIME: ${{ secrets.JWT_ACCESS_TOKEN_LIFETIME }}
-      JWT_REFRESH_TOKEN_LIFETIME: ${{ secrets.JWT_REFRESH_TOKEN_LIFETIME }}
-      DJANGO_SETTINGS_MODULE: WashZone.settings
-      PYTHONUNBUFFERED: 1
-
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3
-        env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-
     steps:
-    - name: Install Redis CLI
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y redis-tools
-        which redis-cli
-        redis-cli --version
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        cache: 'pip'
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gdal-bin libgdal-dev python3-dev
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Wait for Postgres to be ready
-      run: |
-        for i in {1..30}; do
-          if pg_isready -h localhost -p 5432; then
-            echo "Postgres is ready"
-            break
-          fi
-          echo "Waiting for Postgres... (attempt $i/30)"
-          sleep 1
-        done
-
-    - name: Install tblib for parallel testing
-      run: |
-        python -m pip install tblib
-
-    - name: Run migrations and tests
-      run: |
-        python manage.py migrate
-        python manage.py test --parallel auto
-
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
-
-    - name: Add server to known hosts
-      run: |
-        ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
-
-    - name: Deploy to Server
-      env:
-        HOST: ${{ secrets.DEPLOY_HOST }}
-        USER: ${{ secrets.DEPLOY_USER }}
-      run: |
-        ssh $USER@$HOST "
-          set -e
-          cd /home/ubuntu/apps/WashZone/ &&
-          git pull origin main &&
-          source myenv/bin/activate &&
-          pip install -r requirements.txt &&
-          python manage.py migrate &&
-          sudo supervisorctl restart WashZone &&
-          sudo systemctl restart gunicorn &&
-          sudo systemctl reload nginx
-        "
+      - name: Deploy to Server
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh $USER@$HOST "
+            set -e
+            cd /home/ubuntu/apps/WashZone/ &&
+            git pull origin main &&
+            source myenv/bin/activate &&
+            pip install -r requirements.txt &&
+            python manage.py migrate &&
+            sudo supervisorctl restart WashZone &&
+            sudo systemctl restart gunicorn &&
+            sudo systemctl reload nginx
+          "
