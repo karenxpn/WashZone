@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests and Deploy
 
 on:
   push:
@@ -90,3 +90,29 @@ jobs:
       run: |
         python manage.py migrate
         python manage.py test --parallel auto
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
+    - name: Add server to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Server
+      env:
+        HOST: ${{ secrets.DEPLOY_HOST }}
+        USER: ${{ secrets.DEPLOY_USER }}
+      run: |
+        ssh $USER@$HOST "
+          set -e
+          cd /home/ubuntu/apps/WashZone/ &&
+          git pull origin main &&
+          source myenv/bin/activate &&
+          pip install -r requirements.txt &&
+          python manage.py migrate &&
+          sudo supervisorctl restart WashZone &&
+          sudo systemctl restart gunicorn &&
+          sudo systemctl reload nginx
+        "
