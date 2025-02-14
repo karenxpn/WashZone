@@ -10,5 +10,5 @@ router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api/v1/slots', SlotView.as_view(), name='slot'),
+    path('slots', SlotView.as_view(), name='slot'),
 ]
