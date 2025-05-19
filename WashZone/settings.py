@@ -32,9 +32,9 @@ if not SECRET_KEY:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'condor-equipped-terminally.ngrok-free.app', '0.0.0.0', '3.137.169.67', 'washzone.am']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'condor-equipped-terminally.ngrok-free.app', '0.0.0.0', '3.137.169.67', 'washzone.am']
 
 
 # Application definition

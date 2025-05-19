@@ -26,6 +26,7 @@ class SendOTPView(APIView):
     @validate_request(SendOtpBodySerializer)
     def post(self, request):
         validated_data = request.validated_data
+        print("validated data", validated_data)
         phone_number = validated_data['phone_number']
 
         try:
