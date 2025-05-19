@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'authentication',
     'services',
     'orders',
+    'assistant',
     'rest_framework',
     'twilio',
     'silk',
@@ -100,11 +101,11 @@ WSGI_APPLICATION = 'WashZone.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME'),  # Default name unless changed
+        'NAME': os.environ.get('DB_NAME'),
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST'),
-        'PORT': '5432',
+        'PORT': '5433',
     }
 }
 
