@@ -3,7 +3,6 @@ import os
 import chromadb
 from openai import OpenAI
 import json
-from chromadb.config import Settings
 
 open_ai_client = OpenAI(api_key=os.environ.get('OPENAI_SECRET_KEY'))
 client = chromadb.PersistentClient(path="./chroma")
@@ -68,3 +67,16 @@ def add_service_to_provider_embedding(provider_id: int, service_instance, servic
             "type": "service"
         }],
     )
+
+def update_service_in_provider_embedding(provider_id: int, service_instance, service_serializer_class):
+    # Delete the old embedding
+    delete_service_from_provider_embedding(provider_id, service_instance.id)
+
+    # Re-add with updated data
+    add_service_to_provider_embedding(provider_id, service_instance, service_serializer_class)
+
+
+def delete_service_from_provider_embedding(provider_id: int, service_id: int):
+    collection = get_collection("providers")
+    collection.delete(ids=[f"provider-{provider_id}-service-{service_id}"])
+

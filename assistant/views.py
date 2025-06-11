@@ -33,7 +33,7 @@ class AssistantQAView(ViewSet):
                                                                         "You can answer only the questions regarding the can service centers, working hours, services provided by the center etc."
                                                                         "If you don't have data then you should be polite and tell the user that you don't have that information."
                                                                         "If the user is asking about services provided by the provider you can only answer the services provided by the provider."
-                                                                        "And if you don't know what is included in the service, you can only answer the Service name."
+                                                                        "And if you don't know what is included in the service, you can only answer the Service name. Also if the user is asking about the price of the service you should provide base price for it."
                                                                         "The included features can be included or not, you need to answer only included features"),
                 ChatCompletionUserMessageParam(role="user", content=f"Context:\n{context}\n\nQuestion:\n{question}",)
             ]

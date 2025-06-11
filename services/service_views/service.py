@@ -7,7 +7,8 @@ from rest_framework.response import Response
 
 from WashZone.permissions import IsOwner
 from assistant.vector_helper import get_serialized_representation, add_to_vector_db, update_in_vector_db, \
-    delete_from_vector_db, add_service_to_provider_embedding
+    delete_from_vector_db, add_service_to_provider_embedding, update_service_in_provider_embedding, \
+    delete_service_from_provider_embedding
 from authentication.decorators import validate_request
 from services.schemas.service_schemas import service_schemas, additional_features_list_schema, add_feature_schema, \
     remove_feature_schema, update_feature_schema
@@ -95,10 +96,10 @@ class ServiceViewSet(viewsets.ModelViewSet):
         response = super().update(request, *args, **kwargs)
 
         if 200 <= response.status_code < 300:
-            provider_id = response.data['id']
-            provider = Service.objects.get(id=provider_id)
-            serialized_text = get_serialized_representation(provider, ServiceSerializer)
-            update_in_vector_db("services", provider_id, serialized_text, {"model": "Service"})
+            provider_id = response.data.get('provider')
+            service_id = response.data['id']
+            service = Service.objects.get(id=service_id)
+            update_service_in_provider_embedding(provider_id, service, ServiceSerializer)
 
         return response
 
@@ -109,7 +110,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            delete_from_vector_db("services", instance.id)
+            delete_service_from_provider_embedding(instance.provider_id, instance.id)
             self.perform_destroy(instance)
             return Response({"message": "Service deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except NotFound:
