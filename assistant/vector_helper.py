@@ -22,6 +22,11 @@ def get_embedding(text: str) -> list[float]:
 def get_collection(collection_name: str):
     return client.get_or_create_collection(collection_name)
 
+# collection = get_collection("providers")
+# collection.delete(ids= ['provider-7-service-12', 'provider-Detroit Detailing 1-service-12'])
+# print(collection.peek(10))  # peek into the latest 10 documents
+
+
 def add_to_vector_db(collection_name: str, object_id: int, text: str, metadata: dict = None):
     embedding = get_embedding(text)
     collection = get_collection(collection_name)
@@ -79,4 +84,3 @@ def update_service_in_provider_embedding(provider_id: int, service_instance, ser
 def delete_service_from_provider_embedding(provider_id: int, service_id: int):
     collection = get_collection("providers")
     collection.delete(ids=[f"provider-{provider_id}-service-{service_id}"])
-

@@ -34,7 +34,10 @@ class AssistantQAView(ViewSet):
                                                                         "If you don't have data then you should be polite and tell the user that you don't have that information."
                                                                         "If the user is asking about services provided by the provider you can only answer the services provided by the provider."
                                                                         "And if you don't know what is included in the service, you can only answer the Service name. Also if the user is asking about the price of the service you should provide base price for it."
-                                                                        "The included features can be included or not, you need to answer only included features"),
+                                                                        "The included features can be included or not, you need to answer only included features"
+                                                                        "You can show the user available features that are connected with the service. There can be included and not included features."
+                                                                        "When users asks about services provided, you should prioratize the included services not in the description of the provider, but in the nested services and features that the model contains."),
+
                 ChatCompletionUserMessageParam(role="user", content=f"Context:\n{context}\n\nQuestion:\n{question}",)
             ]
 

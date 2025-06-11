@@ -1,7 +1,9 @@
 from rest_framework import status
 from rest_framework.response import Response
 
+from assistant.vector_helper import update_service_in_provider_embedding
 from services.serializers.service_feature_serializer import ServiceFeatureSerializer
+from services.serializers.service_serializer import ServiceSerializer
 from services.service_models.feature import ServiceFeature, Feature
 from services.service_views.add_feature_to_service import validate_ownership
 
@@ -38,13 +40,14 @@ def update_feature(self, request, pk=None, feature_id=None):
         elif not is_included and extra_cost is None:
             service_feature.extra_cost = feature.cost
 
-
         service_feature.save()  # Save the changes
 
         serializer = ServiceFeatureSerializer(service_feature)
+        update_service_in_provider_embedding(service.provider, service, ServiceSerializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     except ServiceFeature.DoesNotExist:
+
         return Response({"message": "The feature is not linked to this service."}, status=status.HTTP_404_NOT_FOUND)
     except Feature.DoesNotExist:
         return Response({'message': 'The feature is not found.'}, status=status.HTTP_404_NOT_FOUND)

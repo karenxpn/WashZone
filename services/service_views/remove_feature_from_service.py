@@ -1,5 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
+
+from assistant.vector_helper import update_service_in_provider_embedding
+from services.serializers.service_serializer import ServiceSerializer
 from services.service_models.feature import ServiceFeature, Feature
 from services.service_views.add_feature_to_service import validate_ownership
 
@@ -18,10 +21,14 @@ def remove_feature(self, request, pk=None, feature_id=None):
 
         service_feature = ServiceFeature.objects.get(service=service, feature_id=feature_id)
         service_feature.delete()  # Delete the relationship
+
+        update_service_in_provider_embedding(service.provider, service, ServiceSerializer)
+
         return Response({"message": "Feature removed from service successfully."}, status=status.HTTP_200_OK)
 
     except ServiceFeature.DoesNotExist:
         return Response({"message": "The feature is not linked to this service."}, status=status.HTTP_404_NOT_FOUND)
     except Feature.DoesNotExist:
         return Response({'message': 'The feature is not found.'}, status=status.HTTP_404_NOT_FOUND)
+
 

@@ -1,7 +1,9 @@
 from rest_framework import status
 from rest_framework.response import Response
 
+from assistant.vector_helper import update_service_in_provider_embedding
 from services.serializers.service_feature_serializer import ServiceFeatureSerializer
+from services.serializers.service_serializer import ServiceSerializer
 from services.service_models.feature import Feature, ServiceFeature
 
 from rest_framework.exceptions import PermissionDenied
@@ -43,6 +45,8 @@ def add_feature_to_service(self, request,  pk=None, feature_id=None):
         )
 
         serializer = ServiceFeatureSerializer(service_feature)
+        update_service_in_provider_embedding(service.provider, service, ServiceSerializer)
+
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
