@@ -1,15 +1,24 @@
-import openai
-from chromadb import Client
+import os
+
+import chromadb
+from openai import OpenAI
+import json
 from chromadb.config import Settings
 
-client = Client(Settings(chroma_db_impl="duckdb+parquet", persist_directory="./chroma"))
+open_ai_client = OpenAI(api_key=os.environ.get('OPENAI_SECRET_KEY'))
+client = chromadb.PersistentClient(path="./chroma")
+
+def get_serialized_representation(instance, serializer_class) -> str:
+    serialized = serializer_class(instance).data
+    return json.dumps(serialized, ensure_ascii=False)
+
 
 def get_embedding(text: str) -> list[float]:
-    response = openai.Embedding.create(
+    response = open_ai_client.embeddings.create(
         input=text,
-        model="text-embedding-ada-002",
+        model="text-embedding-3-small",
     )
-    return response["data"][0]["embedding"]
+    return response.data[0].embedding
 
 def get_collection(collection_name: str):
     return client.get_or_create_collection(collection_name)

@@ -15,7 +15,12 @@ from services.serializers.provider_serializer import (ProviderUpdateSerializer,
     CreateProviderSerializer)
 from services.service_models.provider import Provider
 from user.schemas import presigned_url_schema
-
+from assistant.vector_helper import (
+    get_serialized_representation,
+    add_to_vector_db,
+    update_in_vector_db,
+    delete_from_vector_db
+)
 
 @providers_schema
 class ProviderViewSet(viewsets.ModelViewSet):
@@ -42,7 +47,15 @@ class ProviderViewSet(viewsets.ModelViewSet):
     @validate_request(CreateProviderSerializer)
     def create(self, request, *args, **kwargs):
         try:
-            return super().create(request, *args, **kwargs)
+            response = super().create(request, *args, **kwargs)
+
+            if 200 <= response.status_code < 300:
+                provider_id = response.data['id']
+                provider = Provider.objects.get(id=provider_id)
+                serialized_text = get_serialized_representation(provider, ProviderSerializer)
+                add_to_vector_db("providers", provider_id, serialized_text, {"model": "Provider"})
+
+            return response
         except IntegrityError as e:
             print(e)
             if 'unique constraint' in str(e):
@@ -51,7 +64,15 @@ class ProviderViewSet(viewsets.ModelViewSet):
 
     @validate_request(ProviderUpdateSerializer)
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        response = super().update(request, *args, **kwargs)
+
+        if 200 <= response.status_code < 300:
+            provider_id = response.data['id']
+            provider = Provider.objects.get(id=provider_id)
+            serialized_text = get_serialized_representation(provider, ProviderSerializer)
+            update_in_vector_db("providers", provider_id, serialized_text, {"model": "Provider"})
+
+        return response
 
     @validate_request(ProviderUpdateSerializer)
     def partial_update(self, request, *args, **kwargs):
@@ -60,6 +81,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
+            provider_id = instance.id
+            delete_from_vector_db("providers", provider_id)
             self.perform_destroy(instance)
             return Response({"message": "Provider deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except NotFound:
