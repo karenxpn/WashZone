@@ -50,3 +50,21 @@ def semantic_search(collection_name: str, query: str, top_k: int = 5):
     )
     return results
 
+
+def add_service_to_provider_embedding(provider_id: int, service_instance, service_serializer_class):
+    serialized_text = get_serialized_representation(service_instance, service_serializer_class)
+    embedding = get_embedding(serialized_text)
+
+    collection = get_collection("providers")
+
+    # We upsert using the provider ID (document ID remains the same)
+    collection.upsert(
+        documents=[serialized_text],
+        embeddings=[embedding],
+        ids=[f"provider-{provider_id}-service-{service_instance.id}"],
+        metadatas=[{
+            "provider_id": str(provider_id),   # store as string for consistency in filtering
+            "service_id": str(service_instance.id),
+            "type": "service"
+        }],
+    )
