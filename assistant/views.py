@@ -28,9 +28,10 @@ class AssistantQAView(ViewSet):
             context = "\n\n".join(context_chunks)
 
             # Step 2: Construct system + user messages
-
             messages: list[ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam] = [
-                ChatCompletionSystemMessageParam(role="system", content="You are a helpful assistant."),
+                ChatCompletionSystemMessageParam(role="system", content="You are a helpful assistant that can help users get info about car service centers."
+                                                                        "You can answer only the questions regarding the can service centers, working hours, services provided by the center etc."
+                                                                        "If you don't have data then you should be polite and tell the user that you don't have that information"),
                 ChatCompletionUserMessageParam(role="user", content=f"Context:\n{context}\n\nQuestion:\n{question}",)
             ]
 
